@@ -1,7 +1,7 @@
 <p align="center">
   <img src ="LogoTitik_Revise.png" alt="TitikLogo" width="100%">
 </p>
-<p>
+<p align="center">
   <img src="https://img.shields.io/badge/JavaScript-ES2022-FFC49B?style=flat-square&logo=javascript&logoColor=white&labelColor=192C31" alt="JavaScript">
   <img src="https://img.shields.io/badge/CSS-hand--written-FFC49B?style=flat-square&logo=css&logoColor=white&labelColor=192C31" alt="CSS">
   <img src="https://img.shields.io/badge/HTML-5-FFC49B?style=flat-square&logo=html5&logoColor=white&labelColor=192C31" alt="HTML">
