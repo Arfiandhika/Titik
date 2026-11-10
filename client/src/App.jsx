@@ -15,7 +15,7 @@ import ProfilePage from './pages/ProfilePage.jsx';
 import { LeaderboardPage, SecurityPage, SupportPage } from './pages/SettingsPages.jsx';
 import { ForgotPage, LoginPage, RegisterPage, VerifyPage } from './pages/AuthPages.jsx';
 
-/** Route guard: signed in, optionally verified (FR1) and/or a given role. */
+/** Route guard: signed in, optionally verified and/or a given role. */
 function RequireAuth({ children, verified, role }) {
   const { user, loading } = useAuth();
   const location = useLocation();

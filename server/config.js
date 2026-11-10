@@ -10,7 +10,7 @@ export const OFFICIAL_CODE = process.env.OFFICIAL_CODE || 'TITIK-STAFF-2026';
 export const IS_PROD = process.env.NODE_ENV === 'production';
 export const HOAX_FLAG_THRESHOLD = Number(process.env.HOAX_FLAG_THRESHOLD) || 3;
 
-// FR5: the one place categories are defined. The client reads them from /api/meta.
+// The one place categories are defined. The client reads them from /api/meta.
 export const CATEGORIES = [
   { id: 'pothole', label: 'Pothole', color: '#F2A65A', hint: 'Holes or cracks in the road surface' },
   { id: 'streetlight', label: 'Street light', color: '#F4D35E', hint: 'Broken, flickering or dark street lights' },
@@ -24,7 +24,7 @@ export const CATEGORIES = [
 ];
 export const CATEGORY_IDS = CATEGORIES.map((c) => c.id);
 
-// FR10: report lifecycle.
+// Report lifecycle.
 export const STATUSES = [
   { id: 'submitted', label: 'Submitted' },
   { id: 'under_review', label: 'Under review' },
@@ -34,8 +34,10 @@ export const STATUSES = [
 ];
 export const STATUS_IDS = STATUSES.map((s) => s.id);
 export const ACCEPTED_STATUSES = ['under_review', 'in_progress', 'resolved'];
+// Closing a report needs proof: staff must attach a photo to mark it resolved or rejected (other statuses take none).
+export const PHOTO_STATUSES = ['resolved', 'rejected'];
 
-// FR12: council areas as rough bounding boxes for the Klang Valley pilot.
+// Council areas as rough bounding boxes for the Klang Valley pilot.
 // Order matters: the first box that contains the point wins, so smaller areas come first.
 export const AUTHORITIES = [
   { id: 'PPJ', name: 'Perbadanan Putrajaya', short: 'Putrajaya', box: [2.88, 101.65, 2.99, 101.73] },
@@ -52,18 +54,18 @@ export const AUTHORITIES = [
 export const SERVICE_BOUNDS = [2.85, 101.25, 3.45, 101.85];
 export const MAP_CENTER = { lat: 3.139, lng: 101.6869 };
 
-// FR13: contribution points.
+// Contribution points.
 export const POINTS = {
   REPORT: 10,
   METOO_ACCEPTED: 5,
   REJECTED: -10,
 };
 
-// FR9 / NFR3: duplicate search.
+// Duplicate search.
 export const DUPLICATE_RADIUS_M = 75;
 export const DUPLICATE_MAX_RADIUS_M = 300;
 
-// FR13: rewards catalogue (copied into the rewards table on seed).
+// Rewards catalogue (copied into the rewards table on seed).
 export const REWARDS = [
   { id: 'tree', name: 'Plant a tree in your name', cost: 50, description: 'A sapling planted with a local green group, with your name on the planting list.', stock: 200 },
   { id: 'parking', name: 'Council parking voucher', cost: 80, description: 'Two hours of street parking in your council area.', stock: 150 },

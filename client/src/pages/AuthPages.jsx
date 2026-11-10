@@ -52,7 +52,6 @@ export function PasswordInput({ id, value, onChange, autoComplete }) {
   );
 }
 
-// FR2
 export function LoginPage() {
   const { user, signIn } = useAuth();
   const location = useLocation();
@@ -124,7 +123,6 @@ export function LoginPage() {
   );
 }
 
-// FR1
 export function RegisterPage() {
   const { user, signIn } = useAuth();
   const { meta } = useMeta();
@@ -336,7 +334,7 @@ export function ForgotPage() {
   );
 }
 
-// FR1: verify with the 6-digit code.
+// Verify with the 6-digit code.
 export function VerifyPage() {
   const { user, setUser } = useAuth();
   const location = useLocation();

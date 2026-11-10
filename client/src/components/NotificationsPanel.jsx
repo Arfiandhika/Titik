@@ -7,7 +7,7 @@ import { Icon, NOTIFICATION_ICONS, STROKE } from '../icons.jsx';
 import { timeAgo } from '../utils.js';
 import { Spinner, useToast } from './ui.jsx';
 
-// FR11: the bell opens a dropdown with the latest notifications (a sheet on phones).
+// The bell opens a dropdown with the latest notifications (a sheet on phones).
 export default function NotificationsPanel() {
   const { unread, setUnread } = useAuth();
   const toast = useToast();

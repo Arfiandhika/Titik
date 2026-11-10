@@ -8,7 +8,7 @@ import { STROKE } from '../icons.jsx';
 import { timeAgo } from '../utils.js';
 import { BadgeMedal, Empty, Loading, Modal, Confirm, useToast } from '../components/ui.jsx';
 
-// FR13: contribution points, badges and rewards.
+// Contribution points, badges and rewards.
 const HISTORY_PREVIEW = 5; // latest entries shown before "Show all"
 
 export default function RewardsPage() {

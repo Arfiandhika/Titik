@@ -14,9 +14,9 @@ export const db = new Database(path.join(DATA_DIR, 'titik.db'));
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
-// One table per data requirement (DR1-DR9). No migrations: after a change, run `npm run seed`.
+// One table per data requirement. No migrations: after a change, run `npm run seed`.
 db.exec(`
-CREATE TABLE IF NOT EXISTS users (                 -- DR1
+CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL,
   email TEXT UNIQUE,
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS users (                 -- DR1
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE TABLE IF NOT EXISTS reports (               -- DR2
+CREATE TABLE IF NOT EXISTS reports (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS reports (               -- DR2
 CREATE INDEX IF NOT EXISTS idx_reports_geo ON reports(lat, lng);
 CREATE INDEX IF NOT EXISTS idx_reports_authority ON reports(authority, status);
 
-CREATE TABLE IF NOT EXISTS status_history (        -- DR3
+CREATE TABLE IF NOT EXISTS status_history (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   report_id INTEGER NOT NULL REFERENCES reports(id) ON DELETE CASCADE,
   kind TEXT NOT NULL CHECK (kind IN ('status', 'forward', 'merge')),
@@ -65,11 +65,12 @@ CREATE TABLE IF NOT EXISTS status_history (        -- DR3
   from_authority TEXT,
   to_authority TEXT,
   note TEXT,
+  photo TEXT,                                      -- optional council photo with a status update (e.g. the fixed spot)
   actor_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE TABLE IF NOT EXISTS votes (                 -- DR4
+CREATE TABLE IF NOT EXISTS votes (
   report_id INTEGER NOT NULL REFERENCES reports(id) ON DELETE CASCADE,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   type TEXT NOT NULL CHECK (type IN ('metoo', 'hoax')),
@@ -78,7 +79,7 @@ CREATE TABLE IF NOT EXISTS votes (                 -- DR4
   PRIMARY KEY (report_id, user_id)
 );
 
-CREATE TABLE IF NOT EXISTS comments (              -- DR5
+CREATE TABLE IF NOT EXISTS comments (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   report_id INTEGER NOT NULL REFERENCES reports(id) ON DELETE CASCADE,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -86,7 +87,7 @@ CREATE TABLE IF NOT EXISTS comments (              -- DR5
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE TABLE IF NOT EXISTS notifications (         -- DR6
+CREATE TABLE IF NOT EXISTS notifications (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   report_id INTEGER REFERENCES reports(id) ON DELETE CASCADE,
@@ -96,7 +97,7 @@ CREATE TABLE IF NOT EXISTS notifications (         -- DR6
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE TABLE IF NOT EXISTS points_ledger (         -- DR7
+CREATE TABLE IF NOT EXISTS points_ledger (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   amount INTEGER NOT NULL,
@@ -105,7 +106,7 @@ CREATE TABLE IF NOT EXISTS points_ledger (         -- DR7
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE TABLE IF NOT EXISTS rewards (               -- DR8
+CREATE TABLE IF NOT EXISTS rewards (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
   description TEXT NOT NULL,
@@ -113,7 +114,7 @@ CREATE TABLE IF NOT EXISTS rewards (               -- DR8
   stock INTEGER NOT NULL DEFAULT 0
 );
 
-CREATE TABLE IF NOT EXISTS redemptions (           -- DR9
+CREATE TABLE IF NOT EXISTS redemptions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   reward_id TEXT NOT NULL REFERENCES rewards(id),
@@ -144,9 +145,14 @@ CREATE TABLE IF NOT EXISTS support_tickets (
 );
 `);
 
-// ---------- helpers ----------
+// Databases made before council photos existed lack status_history.photo; add it so status updates keep working.
+if (!db.prepare('PRAGMA table_info(status_history)').all().some((c) => c.name === 'photo')) {
+  db.exec('ALTER TABLE status_history ADD COLUMN photo TEXT');
+}
 
-// FR13: the balance is always the sum of the ledger.
+// helpers
+
+// The balance is always the sum of the ledger.
 export function addPoints(userId, amount, reason, { reportId = null } = {}) {
   if (!userId || !amount) return;
   db.prepare('INSERT INTO points_ledger (user_id, amount, reason, report_id) VALUES (?, ?, ?, ?)').run(
@@ -161,7 +167,6 @@ export function pointsBalance(userId) {
   return db.prepare('SELECT COALESCE(SUM(amount), 0) AS total FROM points_ledger WHERE user_id = ?').get(userId).total;
 }
 
-// FR11
 export function notify(userId, message, { reportId = null, type = 'info' } = {}) {
   if (!userId) return;
   db.prepare('INSERT INTO notifications (user_id, report_id, type, message) VALUES (?, ?, ?, ?)').run(
@@ -178,7 +183,7 @@ export function notifyAuthority(authority, message, opts = {}) {
   for (const s of staff) notify(s.id, message, opts);
 }
 
-// FR12: first matching box wins (AUTHORITIES is ordered most specific first).
+// First matching box wins (AUTHORITIES is ordered most specific first).
 export function authorityFor(lat, lng) {
   for (const a of AUTHORITIES) {
     const [minLat, minLng, maxLat, maxLng] = a.box;
@@ -191,7 +196,7 @@ export function authorityName(id) {
   return AUTHORITIES.find((a) => a.id === id)?.name || 'Unassigned';
 }
 
-// NFR1: what other people may see about a user.
+// What other people may see about a user.
 export function publicUser(u) {
   if (!u) return null;
   return {

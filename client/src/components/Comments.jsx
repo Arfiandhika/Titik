@@ -8,7 +8,7 @@ import { STROKE } from '../icons.jsx';
 import { timeAgo } from '../utils.js';
 import { Avatar, Empty, Spinner, useToast } from './ui.jsx';
 
-// FR15. In a sheet (`inSheet`) the list scrolls and the composer stays at the bottom; `autoFocus` opens the keyboard.
+// In a sheet (`inSheet`) the list scrolls and the composer stays at the bottom; `autoFocus` opens the keyboard.
 export default function Comments({ reportId, onCount, autoFocus = false, inSheet = false }) {
   const { user } = useAuth();
   const { authority } = useMeta();

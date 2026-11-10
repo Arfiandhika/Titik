@@ -21,6 +21,7 @@ import {
   DUPLICATE_MAX_RADIUS_M,
   DUPLICATE_RADIUS_M,
   HOAX_FLAG_THRESHOLD,
+  PHOTO_STATUSES,
   POINTS,
   STATUSES,
   STATUS_IDS,
@@ -28,7 +29,7 @@ import {
 
 const router = Router();
 
-// ---------- uploads (FR4) ----------
+// uploads
 const IMAGE_EXT = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp' };
 export const upload = multer({
   storage: multer.diskStorage({
@@ -48,7 +49,7 @@ function removeUpload(photo) {
   fs.rm(file, { force: true }, () => {});
 }
 
-// ---------- geo ----------
+// geo
 export function distanceM(lat1, lng1, lat2, lng2) {
   const R = 6371000;
   const toRad = (d) => (d * Math.PI) / 180;
@@ -58,7 +59,7 @@ export function distanceM(lat1, lng1, lat2, lng2) {
   return 2 * R * Math.asin(Math.sqrt(a));
 }
 
-// ---------- shaping ----------
+// shaping
 const REPORT_SELECT = `
   SELECT r.*,
     (SELECT COUNT(*) FROM votes v WHERE v.report_id = r.id AND v.type = 'metoo') AS metoo_count,
@@ -114,7 +115,7 @@ function loadReport(req, res) {
   return row;
 }
 
-// FR12/FR16: staff act only on their own council's reports (or unrouted ones).
+// Staff act only on their own council's reports (or unrouted ones).
 const inMyArea = (user, report) => user.role === 'official' && (!report.authority || report.authority === user.authority);
 
 const statusLabel = (id) => STATUSES.find((s) => s.id === id)?.label || id;
@@ -123,7 +124,7 @@ function supporters(reportId) {
   return db.prepare("SELECT user_id FROM votes WHERE report_id = ? AND type = 'metoo'").all(reportId).map((r) => r.user_id);
 }
 
-// FR13: +5 per "Me too" once the report is accepted. Tracked per (user, report) in the ledger.
+// +5 per "Me too" once the report is accepted. Tracked per (user, report) in the ledger.
 const METOO_REASON = 'Me too on an accepted report';
 const METOO_UNDO_REASON = 'Me too removed';
 function metooNet(userId, reportId) {
@@ -138,7 +139,7 @@ function undoMetoo(userId, reportId) {
   if (metooNet(userId, reportId) > 0) addPoints(userId, -POINTS.METOO_ACCEPTED, METOO_UNDO_REASON, { reportId });
 }
 
-// FR8: hoax flag trips at the threshold when hoax votes outnumber "Me too".
+// Hoax flag trips at the threshold when hoax votes outnumber "Me too".
 function refreshHoaxFlag(reportId) {
   const r = db.prepare('SELECT * FROM reports WHERE id = ?').get(reportId);
   const { metoo, hoax } = db
@@ -158,7 +159,7 @@ function refreshHoaxFlag(reportId) {
   }
 }
 
-// ---------- list (FR14) ----------
+// list
 router.get('/', optionalAuth, (req, res) => {
   const where = ['r.merged_into IS NULL'];
   const params = [];
@@ -241,7 +242,7 @@ router.get('/', optionalAuth, (req, res) => {
   res.json({ total, reports: rows.slice(offset, offset + limit).map((r) => shape(r, req.user)) });
 });
 
-// ---------- duplicates (FR9, NFR3) ----------
+// duplicates
 router.get('/duplicates', optionalAuth, (req, res) => {
   const lat = Number(req.query.lat);
   const lng = Number(req.query.lng);
@@ -266,12 +267,12 @@ router.get('/duplicates', optionalAuth, (req, res) => {
   res.json({ radius: Math.round(radius), reports: rows.map((r) => shape(r, req.user)) });
 });
 
-// ---------- detail ----------
+// detail
 router.get('/:id', optionalAuth, (req, res) => {
   const base = loadReport(req, res);
   if (!base) return;
   const report = shape(loadRow(base.id), req.user);
-  // DR3: the timeline.
+  // The timeline.
   const history = db
     .prepare(
       `SELECT h.*, u.id AS a_id, u.name AS a_name, u.role AS a_role, u.authority AS a_authority
@@ -287,6 +288,7 @@ router.get('/:id', optionalAuth, (req, res) => {
       fromAuthority: h.from_authority ? authorityName(h.from_authority) : null,
       toAuthority: h.to_authority ? authorityName(h.to_authority) : null,
       note: h.note,
+      photoUrl: h.photo,
       createdAt: h.created_at,
       actor: h.a_id ? publicUser({ id: h.a_id, name: h.a_name, role: h.a_role, authority: h.a_authority }) : null,
     }));
@@ -301,7 +303,7 @@ router.get('/:id', optionalAuth, (req, res) => {
   });
 });
 
-// ---------- create (FR4, FR5, FR6, FR12, FR13) ----------
+// create
 function readReportFields(body, { partial = false } = {}) {
   const out = {};
   if (!partial || body.title !== undefined) {
@@ -371,7 +373,7 @@ router.post('/', requireVerified, upload.single('photo'), (req, res) => {
   res.status(201).json({ report: shape(loadRow(id), req.user) });
 });
 
-// ---------- edit / delete own report (only while still "submitted") ----------
+// edit / delete own report (only while still "submitted")
 router.patch('/:id', requireVerified, upload.single('photo'), (req, res) => {
   const r = loadReport(req, res);
   if (!r) return;
@@ -409,7 +411,7 @@ router.delete('/:id', requireAuth, (req, res) => {
   res.json({ ok: true });
 });
 
-// ---------- status (FR10, FR11, FR13, FR18) ----------
+// status
 const TRANSITIONS = {
   submitted: ['under_review', 'in_progress', 'resolved', 'rejected'],
   under_review: ['in_progress', 'resolved', 'rejected'],
@@ -418,19 +420,31 @@ const TRANSITIONS = {
   rejected: ['under_review'],
 };
 
-router.patch('/:id/status', requireOfficial, (req, res) => {
+// Resolved and rejected need a staff photo as proof (PHOTO_STATUSES, sent as multipart); other statuses take none (JSON is fine).
+router.patch('/:id/status', requireOfficial, upload.single('photo'), (req, res) => {
+  let photo = req.file ? `/uploads/${req.file.filename}` : null;
+  const fail = (status, error) => {
+    removeUpload(photo);
+    res.status(status).json({ error });
+  };
   const r = loadReport(req, res);
-  if (!r) return;
-  if (!inMyArea(req.user, r)) return res.status(403).json({ error: 'This report belongs to another council. Forward it instead.' });
-  if (r.merged_into) return res.status(400).json({ error: 'This report was merged into another one.' });
+  if (!r) return removeUpload(photo);
+  if (!inMyArea(req.user, r)) return fail(403, 'This report belongs to another council. Forward it instead.');
+  if (r.merged_into) return fail(400, 'This report was merged into another one.');
   const to = req.body?.status;
   const note = String(req.body?.note || '').trim().slice(0, 500);
-  if (!STATUS_IDS.includes(to)) return res.status(400).json({ error: 'Choose a status.' });
+  if (!STATUS_IDS.includes(to)) return fail(400, 'Choose a status.');
   if (!TRANSITIONS[r.status].includes(to)) {
-    return res.status(400).json({ error: `A report that is ${statusLabel(r.status).toLowerCase()} cannot move to ${statusLabel(to).toLowerCase()}.` });
+    return fail(400, `A report that is ${statusLabel(r.status).toLowerCase()} cannot move to ${statusLabel(to).toLowerCase()}.`);
   }
-  // FR18: a reason is required to reject.
-  if (to === 'rejected' && note.length < 5) return res.status(400).json({ error: 'Give a reason for rejecting this report.' });
+  // A reason is required to reject.
+  if (to === 'rejected' && note.length < 5) return fail(400, 'Give a reason for rejecting this report.');
+  if (PHOTO_STATUSES.includes(to)) {
+    if (!photo) return fail(400, to === 'rejected' ? 'Add a photo that shows why this report is rejected.' : 'Add a photo of the fixed spot.');
+  } else if (photo) {
+    removeUpload(photo); // photos only go with resolved / rejected
+    photo = null;
+  }
 
   db.transaction(() => {
     const firstAccept = ACCEPTED_STATUSES.includes(to) && !r.accepted_at;
@@ -439,8 +453,8 @@ router.patch('/:id/status', requireOfficial, (req, res) => {
          authority = COALESCE(authority, ?), updated_at = datetime('now') WHERE id = ?`,
     ).run(to, to === 'rejected' ? note : null, firstAccept ? new Date().toISOString() : null, req.user.authority, r.id);
     db.prepare(
-      "INSERT INTO status_history (report_id, kind, from_status, to_status, note, actor_id) VALUES (?, 'status', ?, ?, ?, ?)",
-    ).run(r.id, r.status, to, note || null, req.user.id);
+      "INSERT INTO status_history (report_id, kind, from_status, to_status, note, photo, actor_id) VALUES (?, 'status', ?, ?, ?, ?, ?)",
+    ).run(r.id, r.status, to, note || null, photo, req.user.id);
 
     const fans = supporters(r.id).filter((id) => id !== r.user_id);
     if (firstAccept) for (const uid of fans) awardMetoo(uid, r.id);
@@ -451,7 +465,7 @@ router.patch('/:id/status', requireOfficial, (req, res) => {
     const msg =
       to === 'rejected'
         ? `Your report "${r.title}" was rejected: ${note}`
-        : `"${r.title}" is now ${statusLabel(to).toLowerCase()}.${note ? ` Note from the council: ${note}` : ''}`;
+        : `"${r.title}" is now ${statusLabel(to).toLowerCase()}.${note ? ` Note from the council: ${note}` : ''}${photo ? ' The council added a photo.' : ''}`;
     notify(r.user_id, msg, { reportId: r.id, type: 'status' });
     for (const uid of fans) {
       notify(uid, `A report you confirmed, "${r.title}", is now ${statusLabel(to).toLowerCase()}.`, { reportId: r.id, type: 'status' });
@@ -460,7 +474,7 @@ router.patch('/:id/status', requireOfficial, (req, res) => {
   res.json({ report: shape(loadRow(r.id), req.user) });
 });
 
-// ---------- forward (FR16) ----------
+// forward
 router.post('/:id/forward', requireOfficial, (req, res) => {
   const r = loadReport(req, res);
   if (!r) return;
@@ -485,7 +499,7 @@ router.post('/:id/forward', requireOfficial, (req, res) => {
   res.json({ report: shape(loadRow(r.id), req.user) });
 });
 
-// ---------- merge duplicate into main (FR19) ----------
+// merge duplicate into main
 router.post('/:id/merge', requireOfficial, (req, res) => {
   const dup = loadReport(req, res);
   if (!dup) return;
@@ -527,7 +541,7 @@ router.post('/:id/merge', requireOfficial, (req, res) => {
   res.json({ report: shape(loadRow(main.id), req.user) });
 });
 
-// ---------- votes (FR7, FR8) ----------
+// votes
 router.post('/:id/vote', requireVerified, (req, res) => {
   const r = loadReport(req, res);
   if (!r) return;
@@ -578,7 +592,7 @@ router.post('/:id/clear-flag', requireOfficial, (req, res) => {
   res.json({ report: shape(loadRow(r.id), req.user) });
 });
 
-// ---------- comments (FR15) ----------
+// comments
 function shapeComment(c) {
   return {
     id: c.id,

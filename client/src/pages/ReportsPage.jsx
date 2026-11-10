@@ -10,7 +10,7 @@ import { Dropdown, Empty, useToast } from '../components/ui.jsx';
 
 const PAGE = 20;
 
-// FR10 / FR14: browse and track reports as a photo feed. "Mine" is the resident's report history.
+// Browse and track reports as a photo feed. "Mine" is the resident's report history.
 export default function ReportsPage() {
   const { user } = useAuth();
   const { meta } = useMeta();
@@ -72,7 +72,7 @@ export default function ReportsPage() {
     <div className="page feed">
       <h1 className="sr-only">Reports</h1>
 
-      {/* Category "stories": tap one to filter the feed (FR5 / FR14) */}
+      {/* Category "stories": tap one to filter the feed */}
       <div className="stories" role="tablist" aria-label="Category">
         <button type="button" role="tab" aria-selected={!category} className={`story ${!category ? 'active' : ''}`} onClick={() => set('category', '')}>
           <span className="story-ring">

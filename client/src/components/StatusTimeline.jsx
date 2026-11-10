@@ -5,7 +5,7 @@ import { dateTime } from '../utils.js';
 
 const FLOW = ['submitted', 'under_review', 'in_progress', 'resolved'];
 
-// FR10: where the report is in its journey (visibility of system status).
+// Where the report is in its journey (visibility of system status).
 export function StatusSteps({ status }) {
   const { status: statuses } = useMeta();
   const at = FLOW.indexOf(status);
@@ -21,7 +21,7 @@ export function StatusSteps({ status }) {
   );
 }
 
-// DR3: full history of status changes, forwards and merges.
+// Full history of status changes, forwards and merges.
 export default function StatusTimeline({ history }) {
   const { status: statuses } = useMeta();
   return (
@@ -55,6 +55,11 @@ export default function StatusTimeline({ history }) {
               {h.actor && ` · ${h.actor.name}${h.actor.role === 'official' ? ` (${h.actor.authority})` : ''}`}
             </div>
             {showNote && <div className="tl-note">{h.note}</div>}
+            {h.photoUrl && (
+              <a className="tl-photo" href={h.photoUrl} target="_blank" rel="noreferrer" aria-label="Open the council photo">
+                <img src={h.photoUrl} alt={`Council photo: ${title}`} loading="lazy" />
+              </a>
+            )}
           </li>
         );
       })}

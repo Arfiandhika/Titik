@@ -33,7 +33,6 @@ function DevCode({ code }) {
   );
 }
 
-// FR13
 export function LeaderboardPage() {
   return (
     <div className="page narrow">
@@ -43,7 +42,7 @@ export function LeaderboardPage() {
   );
 }
 
-// ---------- Security: password, email, forgot password ----------
+// Security: password, email, forgot password
 export function SecurityPage() {
   const { user } = useAuth();
   return (
@@ -260,7 +259,7 @@ function EmailCard() {
   );
 }
 
-// ---------- Customer support: FAQ + contact form ----------
+// Customer support: FAQ + contact form
 export function SupportPage() {
   const { meta } = useMeta();
   const toast = useToast();

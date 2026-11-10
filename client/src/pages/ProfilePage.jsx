@@ -9,7 +9,7 @@ import { Avatar, BadgeMedal, Empty, Loading, Sheet, useToast } from '../componen
 import { useInstall } from '../utils.js';
 import ReportCard from '../components/ReportCard.jsx';
 
-// FR3: own profile (editable) and public profiles (NFR1: name only).
+// Own profile (editable) and public profiles (name only).
 export default function ProfilePage() {
   const { id } = useParams();
   const { user, signOut } = useAuth();

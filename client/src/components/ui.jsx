@@ -5,7 +5,7 @@ import { useMeta } from '../meta.jsx';
 import { BADGE_ICONS, CategoryIcon, Icon, StatusIcon, STROKE } from '../icons.jsx';
 import { initials } from '../utils.js';
 
-// ---- badges and states ----
+// badges and states
 export function StatusBadge({ status }) {
   const { status: statuses } = useMeta();
   return (
@@ -27,7 +27,7 @@ export function CategoryLabel({ category, size = 15 }) {
   );
 }
 
-// FR13: a badge as a round medal in its own colour with the name inside; grey until earned.
+// A badge as a round medal in its own colour with the name inside; grey until earned.
 export function BadgeMedal({ badge, locked = false }) {
   return (
     <div className={`badge-item ${locked ? 'locked' : ''}`} style={{ '--c': badge.color }}>
@@ -40,6 +40,21 @@ export function BadgeMedal({ badge, locked = false }) {
         {badge.description}
       </p>
     </div>
+  );
+}
+
+// A council's logo from client/public/councils/<ID>.png; falls back to a tile with the council code.
+export function CouncilLogo({ id, size = 40 }) {
+  const [failed, setFailed] = useState(false);
+  if (!id) return null;
+  return (
+    <span className="council-logo" style={{ width: size, height: size }} aria-hidden="true">
+      {failed ? (
+        <span className="council-logo-code">{id}</span>
+      ) : (
+        <img src={`/councils/${id}.png`} alt="" onError={() => setFailed(true)} />
+      )}
+    </span>
   );
 }
 
@@ -80,7 +95,7 @@ export function Empty({ icon, title, children, action }) {
   );
 }
 
-// ---- dropdown ----
+// dropdown
 // Styled replacement for <select> (a native menu can't be styled when open).
 // options: [{ value, label, icon, hint, className }]. Keyboard: arrows, Home/End, Enter, Esc.
 export function Dropdown({ value, onChange, options, label, align = 'left' }) {
@@ -185,7 +200,7 @@ export function Dropdown({ value, onChange, options, label, align = 'left' }) {
   );
 }
 
-// ---- sheet ----
+// sheet
 // Bottom sheet on phones, centred panel on larger screens. Locks page scroll while open.
 export function Sheet({ title, onClose, children, className = '' }) {
   const ref = useRef(null);
@@ -244,7 +259,7 @@ export function primeKeyboard() {
   setTimeout(() => el.remove(), 1000);
 }
 
-// ---- modal ----
+// modal
 export function Modal({ title, onClose, children, footer }) {
   const ref = useRef(null);
 
@@ -294,7 +309,7 @@ export function Confirm({ title, message, confirmLabel = 'Confirm', danger, busy
   );
 }
 
-// ---- toasts ----
+// toasts
 const ToastContext = createContext(null);
 
 export function ToastProvider({ children }) {

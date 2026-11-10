@@ -29,7 +29,7 @@ export function requireAuth(req, res, next) {
   next();
 }
 
-// FR1: posting, voting, commenting and redeeming need a verified account.
+// Posting, voting, commenting and redeeming need a verified account.
 export function requireVerified(req, res, next) {
   requireAuth(req, res, () => {
     if (!req.user.verified) {

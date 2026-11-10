@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 // Small helpers: dates and numbers, GPS, photo compression.
 
-// ---- format ----
+// format
 // Server timestamps are SQLite UTC ("YYYY-MM-DD HH:MM:SS") or ISO strings.
 export function parseDate(s) {
   if (!s) return null;
@@ -45,8 +45,8 @@ export function initials(name = '') {
     .join('');
 }
 
-// ---- geo ----
-// NFR3: ask for a fresh, high-accuracy fix and report the accuracy radius.
+// geo
+// Ask for a fresh, high-accuracy fix and report the accuracy radius.
 export function getPosition({ timeout = 12000 } = {}) {
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) return reject(new Error('This device cannot share its location. Pick the spot on the map.'));
@@ -81,8 +81,8 @@ export function formatCoords({ lat, lng }) {
   return `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
 }
 
-// ---- image ----
-// NFR5: shrink photos before upload so reports send quickly on mobile data.
+// image
+// Shrink photos before upload so reports send quickly on mobile data.
 export async function compressImage(file, { maxSide = 1600, quality = 0.82 } = {}) {
   if (!file.type.startsWith('image/')) throw new Error('Choose an image file.');
   let bitmap;
@@ -104,7 +104,7 @@ export async function compressImage(file, { maxSide = 1600, quality = 0.82 } = {
   return new File([blob], file.name.replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' });
 }
 
-// ---- theme ----
+// theme
 // Light or dark. Follows the device until the user picks one; the choice is remembered.
 const THEME_KEY = 'titik-theme';
 const systemTheme = () => (window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
@@ -162,7 +162,7 @@ export function useTheme() {
   return [theme, setTheme];
 }
 
-// ---- install as an app (PWA) ----
+// install as an app (PWA)
 // Android/desktop Chrome fire beforeinstallprompt; we keep it so an "Install" button can use it.
 // iPhone has no prompt: people use Share > Add to Home Screen.
 let installEvent = null;

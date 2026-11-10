@@ -21,7 +21,7 @@ const MAP_LIMIT = 500; // server maximum per request
 
 const PHONE = typeof window !== 'undefined' && window.matchMedia('(max-width: 820px)').matches;
 
-// FR14: interactive map of reports with filters.
+// Interactive map of reports with filters.
 export default function MapPage() {
   const { meta } = useMeta();
   const toast = useToast();

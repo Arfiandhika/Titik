@@ -33,7 +33,7 @@ export function useMapMode() {
   return status === APILoadingStatus.FAILED || status === APILoadingStatus.AUTH_FAILURE ? 'plain' : 'google';
 }
 
-/** Client preview of FR12 routing. The server makes the real decision. */
+/** Client preview of council routing. The server makes the real decision. */
 export function authorityAt(lat, lng, authorities = []) {
   return authorities.find((a) => {
     const [s, w, n, e] = a.box || [];
@@ -52,10 +52,8 @@ export function Pin({ category, active, dim, here, resolved, ring }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Clustering (NFR5): nearby pins merge into a count bubble when zoomed out.
+// Clustering: nearby pins merge into a count bubble when zoomed out.
 // Tap a bubble to zoom in. From zoom 17 every report has its own pin.
-// ---------------------------------------------------------------------------
 const CLUSTER_RADIUS = 60; // px
 const CLUSTER_MAX_ZOOM = 16;
 
@@ -87,9 +85,7 @@ export function ClusterBubble({ count }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Report map (FR14)
-// ---------------------------------------------------------------------------
+// Report map
 export function ReportMap({ reports, selectedId, onSelect, me, focus, center, zoom = 12, ringStatus = false }) {
   const mode = useMapMode();
   const [theme] = useTheme();
@@ -185,9 +181,7 @@ function PanTo({ focus }) {
   return null;
 }
 
-// ---------------------------------------------------------------------------
-// Point picker (FR6): tap the map or drag the pin.
-// ---------------------------------------------------------------------------
+// Point picker: tap the map or drag the pin.
 export function PickMap({ value, onChange, others = [] }) {
   const mode = useMapMode();
   const [theme] = useTheme();
@@ -245,10 +239,8 @@ export function PickMap({ value, onChange, others = [] }) {
   );
 }
 
-// ---------------------------------------------------------------------------
 // Built-in fallback map: council areas on a grid, pan with drag, zoom with buttons or wheel.
 // Keeps the app usable without a Google Maps key.
-// ---------------------------------------------------------------------------
 function PlainMap({ center, zoom: startZoom = 12, markers, onClick, focus, hint, onView }) {
   const { meta } = useMeta();
   const ref = useRef(null);

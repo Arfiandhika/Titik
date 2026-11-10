@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { api } from './api.js';
 
-// FR5: categories, statuses and councils come from the server (/api/meta), never hard-coded here.
+// Categories, statuses and councils come from the server (/api/meta), never hard-coded here.
 const MetaContext = createContext(null);
 
 export function MetaProvider({ children }) {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -12,12 +12,16 @@ import {
   Sparkles,
   ShieldCheck,
   FileQuestion,
+  Camera,
+  Check,
+  Landmark,
+  X,
 } from 'lucide-react';
 import { api, qs } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { useMeta } from '../meta.jsx';
-import { STROKE } from '../icons.jsx';
-import { dateTime, distance, timeAgo } from '../utils.js';
+import { STROKE, StatusIcon } from '../icons.jsx';
+import { compressImage, dateTime, distance, inBounds, timeAgo } from '../utils.js';
 import { CategoryLabel, Empty, Loading, Spinner, StatusBadge, Modal, Confirm, useToast } from '../components/ui.jsx';
 import VoteButtons from '../components/VoteButtons.jsx';
 import Comments from '../components/Comments.jsx';
@@ -312,9 +316,47 @@ function EditModal({ report, categories, onClose, onSaved }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Staff panel: FR10 status, FR16 forward, FR18 reject reason, FR19 merge.
-// ---------------------------------------------------------------------------
+// One line under each status option in the staff panel.
+const STATUS_HINTS = {
+  under_review: 'Checking the report',
+  in_progress: 'Work has started',
+  resolved: 'Fixed. Photo needed',
+  rejected: 'Not valid. Reason and photo needed',
+};
+
+// Pick the council to forward to. Councils whose area covers the report's spot come first.
+function CouncilPicker({ authorities, report, value, onChange }) {
+  const spot = { lat: report.lat, lng: report.lng };
+  const options = authorities
+    .filter((a) => a.id !== report.authority)
+    .map((a) => ({ ...a, covers: inBounds(spot, a.box) }))
+    .sort((a, b) => Number(b.covers) - Number(a.covers));
+  return (
+    <fieldset className="field council-pick">
+      <legend className="label">Send to council</legend>
+      <div className="council-list" role="radiogroup" aria-label="Council">
+        {options.map((a) => (
+          <label key={a.id} className={`council-opt ${value === a.id ? 'on' : ''}`}>
+            <input type="radio" name="forward-to" className="sr-only" value={a.id} checked={value === a.id} onChange={() => onChange(a.id)} />
+            <span className="council-ic">
+              <Landmark size={17} strokeWidth={STROKE} />
+            </span>
+            <span className="grow" style={{ minWidth: 0 }}>
+              <span className="council-name">
+                {a.short} <span className="council-code">{a.id}</span>
+              </span>
+              <span className="council-full">{a.name}</span>
+              {a.covers && <span className="council-hint">Covers this spot</span>}
+            </span>
+            <span className="council-check">{value === a.id && <Check size={15} strokeWidth={2} />}</span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
+// Staff panel: update status, forward, merge.
 function StaffPanel({ data, onDone }) {
   const { meta, status: statuses } = useMeta();
   const { user } = useAuth();
@@ -327,6 +369,20 @@ function StaffPanel({ data, onDone }) {
   const [mergeInto, setMergeInto] = useState('');
   const [nearby, setNearby] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [photo, setPhoto] = useState(null); // { file, url }: council photo, required for resolved / rejected
+  const photoRef = useRef(null);
+
+  useEffect(() => () => photo && URL.revokeObjectURL(photo.url), [photo]);
+
+  async function pickPhoto(file) {
+    if (!file) return;
+    try {
+      const small = await compressImage(file);
+      setPhoto({ file: small, url: URL.createObjectURL(small) });
+    } catch (err) {
+      toast.error(err);
+    }
+  }
 
   useEffect(() => {
     setTo(data.allowedStatuses[0] || '');
@@ -341,6 +397,7 @@ function StaffPanel({ data, onDone }) {
 
   const closed = ['resolved', 'rejected'].includes(r.status);
   const reasonNeeded = to === 'rejected';
+  const photoNeeded = (meta.photoStatuses || []).includes(to); // resolved / rejected need a photo as proof
 
   async function run(fn, okMsg) {
     setBusy(true);
@@ -359,7 +416,15 @@ function StaffPanel({ data, onDone }) {
 
   const updateStatus = (e) => {
     e.preventDefault();
-    run(() => api(`/reports/${r.id}/status`, { method: 'PATCH', body: { status: to, note } }), `Marked ${statuses[to].label.toLowerCase()}. The reporter was notified.`);
+    const send = () => {
+      if (!photoNeeded) return api(`/reports/${r.id}/status`, { method: 'PATCH', body: { status: to, note } });
+      const form = new FormData();
+      form.append('status', to);
+      form.append('note', note);
+      form.append('photo', photo.file);
+      return api(`/reports/${r.id}/status`, { method: 'PATCH', form }).then(() => setPhoto(null));
+    };
+    run(send, `Marked ${statuses[to].label.toLowerCase()}. The reporter was notified.`);
   };
   const forward = (e) => {
     e.preventDefault();
@@ -393,18 +458,23 @@ function StaffPanel({ data, onDone }) {
 
       {data.allowedStatuses.length > 0 && (
         <form className="stack" onSubmit={updateStatus}>
-          <div className="field">
-            <label className="label" htmlFor="st-to">
-              Update status
-            </label>
-            <select id="st-to" className="select" value={to} onChange={(e) => setTo(e.target.value)}>
+          <fieldset className="field status-pick">
+            <legend className="label">Update status</legend>
+            <div className="status-options" role="radiogroup" aria-label="New status">
               {data.allowedStatuses.map((s) => (
-                <option key={s} value={s}>
-                  {statuses[s].label}
-                </option>
+                <label key={s} className={`status-opt st-${s} ${to === s ? 'on' : ''}`}>
+                  <input type="radio" name="status-to" className="sr-only" value={s} checked={to === s} onChange={() => setTo(s)} />
+                  <span className="status-opt-ic">
+                    <StatusIcon id={s} size={17} />
+                  </span>
+                  <span className="status-opt-text">
+                    <span className="status-opt-label">{statuses[s].label}</span>
+                    <span className="status-opt-hint">{STATUS_HINTS[s]}</span>
+                  </span>
+                </label>
               ))}
-            </select>
-          </div>
+            </div>
+          </fieldset>
           <div className="field">
             <label className="label" htmlFor="st-note">
               {reasonNeeded ? 'Reason for rejecting' : 'Note to residents'} {!reasonNeeded && <span className="opt">(optional)</span>}
@@ -420,7 +490,36 @@ function StaffPanel({ data, onDone }) {
             />
             {reasonNeeded && <span className="hint">Required. The reporter and supporters will see this.</span>}
           </div>
-          <button className={`btn ${reasonNeeded ? 'btn-danger' : 'btn-primary'}`} disabled={busy || !to || (reasonNeeded && note.trim().length < 5)}>
+          {photoNeeded && (
+            <div className="field">
+              <span className="label">{reasonNeeded ? 'Photo of the spot' : 'Photo of the fixed spot'}</span>
+              {photo ? (
+                <div className="staff-photo">
+                  <img src={photo.url} alt="Photo to attach" />
+                  <button type="button" className="icon-btn sm staff-photo-remove" onClick={() => setPhoto(null)} aria-label="Remove photo">
+                    <X size={15} strokeWidth={STROKE} />
+                  </button>
+                </div>
+              ) : (
+                <button type="button" className="staff-photo-drop" onClick={() => photoRef.current?.click()}>
+                  <Camera size={22} strokeWidth={STROKE} />
+                  <span className="strong small">Add a photo</span>
+                </button>
+              )}
+              <input
+                ref={photoRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                hidden
+                onChange={(e) => {
+                  pickPhoto(e.target.files?.[0]);
+                  e.target.value = '';
+                }}
+              />
+              <span className="hint">Required. Residents see it in the progress timeline.</span>
+            </div>
+          )}
+          <button className={`btn ${reasonNeeded ? 'btn-danger' : 'btn-primary'}`} disabled={busy || !to || (reasonNeeded && note.trim().length < 5) || (photoNeeded && !photo)}>
             {busy && <Spinner size={16} />} {reasonNeeded ? 'Reject report' : `Mark ${statuses[to]?.label.toLowerCase() || ''}`}
           </button>
         </form>
@@ -439,21 +538,7 @@ function StaffPanel({ data, onDone }) {
 
       {mode === 'forward' && (
         <form className="stack" onSubmit={forward}>
-          <div className="field">
-            <label className="label" htmlFor="fw-to">
-              Send to council
-            </label>
-            <select id="fw-to" className="select" value={forwardTo} onChange={(e) => setForwardTo(e.target.value)}>
-              <option value="">Choose a council</option>
-              {meta.authorities
-                .filter((a) => a.id !== r.authority)
-                .map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.name}
-                  </option>
-                ))}
-            </select>
-          </div>
+          <CouncilPicker authorities={meta.authorities} report={r} value={forwardTo} onChange={setForwardTo} />
           <div className="field">
             <label className="label" htmlFor="fw-note">
               Note <span className="opt">(optional)</span>

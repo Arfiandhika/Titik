@@ -31,7 +31,7 @@ function findByIdentifier(id) {
   return db.prepare('SELECT * FROM users WHERE phone = ?').get(id.phone);
 }
 
-// FR1: a code is "sent" by email or SMS. No provider is connected in the pilot,
+// A code is "sent" by email or SMS. No provider is connected in the pilot,
 // so outside production the code is logged and returned as devCode.
 function issueCode(user) {
   const code = String(crypto.randomInt(100000, 1000000));
@@ -41,7 +41,7 @@ function issueCode(user) {
   return IS_PROD ? {} : { devCode: code };
 }
 
-// FR1: register with email or phone.
+// Register with email or phone.
 router.post('/register', (req, res) => {
   const { name, identifier, password, role = 'resident', officialCode, authority } = req.body || {};
   const cleanName = String(name || '').trim();
@@ -85,7 +85,6 @@ router.post('/resend', requireAuth, (req, res) => {
   res.json({ ok: true, ...issueCode(req.user) });
 });
 
-// FR2
 router.post('/login', (req, res) => {
   const { identifier, password } = req.body || {};
   const id = parseIdentifier(identifier);
@@ -98,7 +97,7 @@ router.post('/login', (req, res) => {
 
 router.get('/me', requireAuth, (req, res) => res.json({ user: selfUser(req.user) }));
 
-// FR3: edit own profile.
+// Edit own profile.
 router.patch('/me', requireAuth, (req, res) => {
   const { name, homeArea, currentPassword, newPassword } = req.body || {};
   const u = req.user;
@@ -123,8 +122,8 @@ router.patch('/me', requireAuth, (req, res) => {
   res.json({ user: selfUser(getUser(u.id)) });
 });
 
-// ---------- security: change email, forgot password ----------
-// Codes work like FR1 verification: no email/SMS provider is connected, so outside
+// security: change email, forgot password
+// Codes work like account verification: no email/SMS provider is connected, so outside
 // production the code is logged and returned as devCode.
 const MAX_CODE_ATTEMPTS = 5;
 

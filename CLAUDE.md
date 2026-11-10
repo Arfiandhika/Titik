@@ -6,7 +6,7 @@ Guidance for Claude Code when working in this repository.
 
 **Titik** — a civic reporting app for the Klang Valley, Malaysia pilot. Residents report damaged public infrastructure with a photo and GPS. Reports are routed to the responsible local council, and residents track them until fixed. The community confirms reports ("Me too") or flags them ("Hoax"), and contributions earn points that can be redeemed for rewards. Council staff use an area-scoped dashboard.
 
-This is a university HCI assignment (ITS 63504 / ITS69904, Taylor's University, Group 39). Requirement IDs (FR1–FR20, NFR1–NFR6, DR1–DR9) come from the assignment document; `README.md` maps each one to the code. When you add or change a feature, keep that mapping accurate and mention the requirement ID in code comments where it helps.
+This is a university HCI assignment (ITS 63504 / ITS69904, Taylor's University, Group 39). Requirement IDs (FR1–FR20, NFR1–NFR6, DR1–DR9) come from the assignment document; `README.md` maps each one to the code. When you add or change a feature, keep that mapping accurate. Don't put requirement IDs in code comments: keep comments short and plain, one line where possible, with no `// -----` banner lines.
 
 ## Commands
 
@@ -76,7 +76,7 @@ Keep the layout flat: put new shared helpers in `utils.js` and small shared UI i
 - **Merge** (FR19): the duplicate gets `merged_into` and status `rejected`; its reporter and supporters become "Me too" on the main report. Lists exclude merged reports.
 - **Privacy** (NFR1): anything returned about *another* user goes through `publicUser()` (display name only, never email or phone). `selfUser()` is only for the signed-in user.
 - **Verification** (FR1): posting, voting, commenting and redeeming use `requireVerified`. No SMS/email provider is connected; in non-production the code is logged and returned as `devCode`. Email-change and password-reset codes work the same way.
-- **History** (DR3): every status change, forward and merge inserts a `status_history` row (`kind` = `status` | `forward` | `merge`), and the affected users get a notification (FR11).
+- **History** (DR3): every status change, forward and merge inserts a `status_history` row (`kind` = `status` | `forward` | `merge`); moving to `resolved` or `rejected` requires a staff `photo` (`PHOTO_STATUSES` in config.js, multipart on `PATCH /reports/:id/status`, enforced on the server); other statuses take none. The photo is stored on the history row and shown in `StatusTimeline`, and the affected users get a notification (FR11).
 - Database changes go in the `CREATE TABLE IF NOT EXISTS` block in `db.js`. There are no migrations, so after a schema change run `npm run seed`, or delete `server/data/` to recreate the database.
 
 ## Design rules

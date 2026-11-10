@@ -1,4 +1,4 @@
-// FR20 / NFR6: photo -> category suggestion. The result is only a suggestion the
+// Photo -> category suggestion. The result is only a suggestion the
 // resident can change, and the app works the same with AI turned off.
 import Anthropic from '@anthropic-ai/sdk';
 import fs from 'node:fs';

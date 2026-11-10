@@ -43,7 +43,7 @@ export function AuthProvider({ children }) {
     refresh();
   }, [refresh]);
 
-  // FR11: keep the bell count fresh.
+  // Keep the bell count fresh.
   useEffect(() => {
     if (!user) return undefined;
     refreshUnread();

@@ -12,7 +12,7 @@ import { authorityAt } from '../components/GoogleMap.jsx';
 
 const STEPS = ['Photo', 'Details', 'Location', 'Check and send'];
 
-// FR4-FR6, FR9, FR12, FR20: the reporting flow.
+// The reporting flow.
 export default function NewReportPage() {
   const { meta, category: cats } = useMeta();
   const { refresh } = useAuth();
@@ -37,7 +37,7 @@ export default function NewReportPage() {
 
   useEffect(() => () => preview && URL.revokeObjectURL(preview), [preview]);
 
-  // ---- photo + AI suggestion ----
+  // photo + AI suggestion
   async function choosePhoto(file) {
     if (!file) return;
     try {
@@ -73,7 +73,7 @@ export default function NewReportPage() {
     setAi({ state: 'idle', suggestion: null });
   }
 
-  // ---- location: try GPS once when the step opens ----
+  // location: try GPS once when the step opens
   useEffect(() => {
     if (step !== 2 || location || autoLocated.current) return;
     autoLocated.current = true;
@@ -82,7 +82,7 @@ export default function NewReportPage() {
       .catch(() => {});
   }, [step, location]);
 
-  // FR9: look for open reports nearby whenever the pin moves.
+  // Look for open reports nearby whenever the pin moves.
   useEffect(() => {
     if (!location) return undefined;
     setDupesSeen(false);
@@ -100,7 +100,7 @@ export default function NewReportPage() {
 
   const onAddress = useCallback((a) => setAddress(a), []);
 
-  // ---- validation per step (error prevention) ----
+  // validation per step (error prevention)
   function validate(s = step) {
     const e = {};
     if (s === 0 && !photo) e.photo = 'Add a photo so the council can see the problem.';

@@ -6,7 +6,7 @@ import { useAuth } from '../auth.jsx';
 import { BADGE_ICONS, Icon } from '../icons.jsx';
 import { Avatar, Empty, Loading, useToast } from './ui.jsx';
 
-// FR13: top contributors by points earned (redemptions don't lower your rank).
+// Top contributors by points earned (redemptions don't lower your rank).
 export default function Leaderboard({ title = 'Leaderboard', as: H = 'h1' }) {
   const { user } = useAuth();
   const toast = useToast();

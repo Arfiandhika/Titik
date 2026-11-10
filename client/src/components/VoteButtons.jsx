@@ -6,7 +6,7 @@ import { useAuth } from '../auth.jsx';
 import { STROKE } from '../icons.jsx';
 import { useToast } from './ui.jsx';
 
-/** Shared "Me too" / "Hoax" voting (FR7 / FR8), used by VoteButtons and the feed. */
+/** Shared "Me too" / "Hoax" voting, used by VoteButtons and the feed. */
 export function useVote(report, onChange) {
   const { user } = useAuth();
   const toast = useToast();
@@ -43,7 +43,7 @@ export function useVote(report, onChange) {
   return { vote, busy, disabledReason };
 }
 
-// FR7 / FR8: "Me too" and "Hoax". Pressing the same button again takes the vote back.
+// "Me too" and "Hoax". Pressing the same button again takes the vote back.
 export default function VoteButtons({ report, onChange }) {
   const { vote, busy, disabledReason } = useVote(report, onChange);
 

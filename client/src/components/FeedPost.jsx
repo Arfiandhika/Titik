@@ -9,7 +9,7 @@ import { distance, plural, timeAgo } from '../utils.js';
 
 const I = (C, size = 24) => <C size={size} strokeWidth={STROKE} aria-hidden="true" />;
 
-// Feed-style report post (FR10 / FR14). Double-tap the photo to say "Me too" (FR7).
+// Feed-style report post. Double-tap the photo to say "Me too".
 export default function FeedPost({ report: r, onChange }) {
   const { vote, busy, disabledReason } = useVote(r, onChange);
   const toast = useToast();

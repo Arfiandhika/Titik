@@ -6,7 +6,7 @@ import { useAuth } from '../auth.jsx';
 import { useMeta } from '../meta.jsx';
 import { CategoryIcon, STROKE } from '../icons.jsx';
 import { timeAgo } from '../utils.js';
-import { Empty, Loading, StatusBadge, useToast } from '../components/ui.jsx';
+import { CouncilLogo, Empty, Loading, StatusBadge, useToast } from '../components/ui.jsx';
 
 const QUEUES = [
   { id: 'new', label: 'New', status: ['submitted'] },
@@ -17,7 +17,7 @@ const QUEUES = [
   { id: 'all', label: 'All', status: [] },
 ];
 
-// FR17: council dashboard, scoped to the signed-in officer's council (plus unrouted reports).
+// Council dashboard, scoped to the signed-in officer's council (plus unrouted reports).
 export default function DashboardPage() {
   const { user } = useAuth();
   const { meta, category: cats, status: statuses, authority } = useMeta();
@@ -58,17 +58,17 @@ export default function DashboardPage() {
   return (
     <div className="page">
       <div className="page-head">
-        <div>
-          <h1>{authority[user.authority]?.name}</h1>
-          <p>Reports in your area, plus reports outside every council area.</p>
-        </div>
+        <h1 className="council-title">
+          <CouncilLogo id={user.authority} />
+          {authority[user.authority]?.name}
+        </h1>
       </div>
 
       <div className="grid cols-4" style={{ marginBottom: 20 }}>
-        <Stat icon={CircleDot} label="Open reports" value={stats.open} />
-        <Stat icon={CalendarPlus} label="New this week" value={stats.newThisWeek} />
-        <Stat icon={ShieldAlert} label="Flagged as hoax" value={stats.flagged} />
-        <Stat icon={Clock} label="Average days to fix" value={stats.avgDaysToResolve ?? '-'} />
+        <Stat icon={CircleDot} label="Open reports" value={stats.open} tone="green" />
+        <Stat icon={CalendarPlus} label="New this week" value={stats.newThisWeek} tone="blue" />
+        <Stat icon={ShieldAlert} label="Flagged as hoax" value={stats.flagged} tone="red" />
+        <Stat icon={Clock} label="Average days to fix" value={stats.avgDaysToResolve ?? '-'} tone="yellow" />
       </div>
 
       <div className="grid cols-2" style={{ marginBottom: 20 }}>
@@ -217,11 +217,15 @@ export default function DashboardPage() {
   );
 }
 
-function Stat({ icon: Ic, label, value }) {
+// tone: green | blue | red | yellow (colours come from the status tokens in styles.css)
+function Stat({ icon: Ic, label, value, tone }) {
   return (
-    <div className="stat">
+    <div className={`stat ${tone ? `tone-${tone}` : ''}`}>
       <span className="k">
-        <Ic size={15} strokeWidth={STROKE} /> {label}
+        <span className="stat-ic">
+          <Ic size={15} strokeWidth={STROKE} />
+        </span>
+        {label}
       </span>
       <span className="v">{value}</span>
     </div>

@@ -7,7 +7,7 @@ import { STROKE } from '../icons.jsx';
 import { PickMap, authorityAt, useMapMode } from './GoogleMap.jsx';
 import { Spinner } from './ui.jsx';
 
-// FR6: GPS first, then the resident can fine-tune by tapping the map or dragging the pin.
+// GPS first, then the resident can fine-tune by tapping the map or dragging the pin.
 export default function LocationPicker({ value, onChange, address, onAddress, nearby = [] }) {
   const { meta } = useMeta();
   const mode = useMapMode();

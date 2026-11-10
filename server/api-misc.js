@@ -14,6 +14,7 @@ import {
   DUPLICATE_RADIUS_M,
   HOAX_FLAG_THRESHOLD,
   MAP_CENTER,
+  PHOTO_STATUSES,
   POINTS,
   SERVICE_BOUNDS,
   STATUSES,
@@ -23,11 +24,12 @@ import {
 const router = Router();
 const REDEEM_PREFIX = 'Redeemed: ';
 
-// ---------- meta: single source for categories, statuses, councils ----------
+// meta: single source for categories, statuses, councils
 router.get('/meta', (_req, res) => {
   res.json({
     categories: CATEGORIES,
     statuses: STATUSES,
+    photoStatuses: PHOTO_STATUSES,
     authorities: AUTHORITIES.map(({ id, name, short, box }) => ({ id, name, short, box })),
     points: POINTS,
     badges: BADGES.map(({ id, label, description, color }) => ({ id, label, description, color })),
@@ -40,7 +42,7 @@ router.get('/meta', (_req, res) => {
   });
 });
 
-// ---------- customer support ----------
+// customer support
 const shapeTicket = (t) => ({ id: t.id, topic: t.topic, message: t.message, status: t.status, createdAt: t.created_at });
 
 router.get('/support', requireAuth, (req, res) => {
@@ -62,7 +64,7 @@ router.post('/support', requireAuth, (req, res) => {
   res.status(201).json({ ticket: shapeTicket(ticket) });
 });
 
-// ---------- AI category suggestion (FR20, NFR6) ----------
+// AI category suggestion
 router.post('/ai/classify', requireVerified, upload.single('photo'), async (req, res, next) => {
   if (!req.file) return res.status(400).json({ error: 'Add a photo first.' });
   try {
@@ -76,7 +78,7 @@ router.post('/ai/classify', requireVerified, upload.single('photo'), async (req,
   }
 });
 
-// ---------- notifications (FR11) ----------
+// notifications
 router.get('/notifications', requireAuth, (req, res) => {
   const rows = db
     .prepare('SELECT * FROM notifications WHERE user_id = ? ORDER BY created_at DESC, id DESC LIMIT 100')
@@ -109,7 +111,7 @@ router.post('/notifications/read', requireAuth, (req, res) => {
   res.json({ ok: true });
 });
 
-// ---------- profiles, badges ----------
+// profiles, badges
 export function userStats(userId) {
   const one = (sql) => db.prepare(sql).get(userId).n;
   return {
@@ -136,7 +138,7 @@ router.get('/users/:id', optionalAuth, (req, res) => {
   });
 });
 
-// ---------- points (FR13) ----------
+// points
 router.get('/points', requireAuth, (req, res) => {
   const history = db
     .prepare(
@@ -155,7 +157,7 @@ router.get('/points', requireAuth, (req, res) => {
   res.json({ balance: pointsBalance(req.user.id), stats, badges: badgesFor(stats), history, redemptions });
 });
 
-// ---------- rewards (FR13) ----------
+// rewards
 router.get('/rewards', (_req, res) => {
   res.json({ rewards: db.prepare('SELECT * FROM rewards ORDER BY cost ASC').all() });
 });
@@ -182,7 +184,7 @@ router.post('/rewards/:id/redeem', requireVerified, (req, res) => {
   res.json({ code: result.code, balance: pointsBalance(req.user.id) });
 });
 
-// ---------- leaderboard (FR13) ----------
+// leaderboard
 router.get('/leaderboard', optionalAuth, (req, res) => {
   const month = req.query.period === 'month';
   const rows = db
@@ -203,7 +205,7 @@ router.get('/leaderboard', optionalAuth, (req, res) => {
   });
 });
 
-// ---------- stats (FR17 dashboard; public summary for the map page) ----------
+// stats (dashboard; public summary for the map page)
 router.get('/stats', optionalAuth, (req, res) => {
   let authority = req.query.authority || null;
   if (req.query.area === 'mine' && req.user?.role === 'official') authority = req.user.authority;
