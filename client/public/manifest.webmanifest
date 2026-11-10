@@ -1,0 +1,23 @@
+{
+  "id": "/",
+  "name": "Titik",
+  "short_name": "Titik",
+  "description": "Report damaged roads, lights and public facilities in the Klang Valley and track them until they are fixed.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#192C31",
+  "theme_color": "#192C31",
+  "lang": "en-MY",
+  "categories": ["utilities", "lifestyle"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Report a problem", "short_name": "Report", "url": "/new", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Map", "url": "/map", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
