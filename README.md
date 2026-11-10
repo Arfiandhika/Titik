@@ -1,6 +1,11 @@
-# Titik
-
-![Titik Logo](LogoTitik_Revise.png)
+<p align="center">
+  <img src ="LogoTitik_Revise.png" alt="TitikLogo" width="100%">
+</p>
+<p>
+  <img src="https://img.shields.io/badge/JavaScript-ES2022-FFC49B?style=flat-square&logo=javascript&logoColor=white&labelColor=192C31" alt="JavaScript">
+  <img src="https://img.shields.io/badge/CSS-hand--written-FFC49B?style=flat-square&logo=css&logoColor=white&labelColor=192C31" alt="CSS">
+  <img src="https://img.shields.io/badge/HTML-5-FFC49B?style=flat-square&logo=html5&logoColor=white&labelColor=192C31" alt="HTML">
+</p>
 
 Civic reporting around Malaysia (pilot). Residents report damaged public infrastructure with a photo and GPS, the report is routed to the responsible local council, and residents follow it until it is fixed. The community confirms reports ("Me too") or flags them ("Hoax"), and contributions earn points that can be redeemed for rewards. Council staff work from a dashboard scoped to their own area.
 
@@ -56,7 +61,7 @@ No email or SMS service is connected. Outside production the 6-digit verificatio
 1. **Report.** A verified resident adds a photo (camera or file; resized in the browser before upload), picks a category (the AI can pre-select one), writes a title, and sets the spot by GPS or by tapping the map.
 2. **Duplicate check.** Before sending, Titik lists open reports within 75 m (widened by the GPS accuracy, up to 300 m). If one is the same problem, "Same issue" adds the resident's "Me too" to it instead.
 3. **Routing.** The server picks the council from the location (first matching council area, most specific first). Spots outside every area are left unrouted for staff to pick up.
-4. **Tracking.** Staff move the report through Submitted, Under review, In progress, Resolved, or Rejected (a reason is required). Every change, forward and merge is kept in the report's history, and the reporter and supporters are notified.
+4. **Tracking.** Staff move the report through Submitted, Under review, In progress, Resolved, or Rejected. Rejecting needs a reason, and both Resolved and Rejected need a staff photo as proof (for example the fixed spot), which shows in the report's progress timeline. Staff forward a report by picking from a list of councils, with the ones covering the spot shown first. Every change, forward and merge is kept in the report's history, and the reporter and supporters are notified.
 5. **Community.** Residents say "Me too", flag a "Hoax" (at 3 hoax votes that outnumber "Me too", staff are alerted), and comment.
 6. **Points.** +10 per report, +5 per "Me too" once the council accepts the report, −10 if a report is rejected. Points buy rewards and count toward badges and the leaderboard.
 
