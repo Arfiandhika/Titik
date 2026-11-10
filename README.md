@@ -86,7 +86,8 @@ server/
   api-reports.js    reports, votes, comments, status, forward, merge
   api-misc.js       meta, AI, notifications, profiles, points, rewards, leaderboard, stats
   ai.js             photo -> category suggestion (Claude)
-  seed.js           demo data; illustrations.js draws the sample report images
+  seed.js           demo data; photos for the sample reports are in seed-photos/
+                    (illustrations.js draws a fallback picture if one is missing)
 client/
   index.html, vite.config.js
   public/           favicon, app icons, manifest.webmanifest, sw.js (installable app)

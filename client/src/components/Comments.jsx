@@ -28,7 +28,8 @@ export default function Comments({ reportId, onCount, autoFocus = false, inSheet
     const el = inputRef.current;
     if (!el) return;
     el.style.height = 'auto';
-    el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+    const border = el.offsetHeight - el.clientHeight; // include the border so the text never overflows by a pixel
+    el.style.height = `${Math.min(el.scrollHeight + border, 120)}px`;
   }, [body]);
 
   useEffect(() => {

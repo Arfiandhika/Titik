@@ -4,9 +4,9 @@ import { Gift, Copy, Ticket } from 'lucide-react';
 import { api } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { useMeta } from '../meta.jsx';
-import { BADGE_ICONS, Icon, STROKE } from '../icons.jsx';
+import { STROKE } from '../icons.jsx';
 import { timeAgo } from '../utils.js';
-import { Empty, Loading, Modal, Confirm, useToast } from '../components/ui.jsx';
+import { BadgeMedal, Empty, Loading, Modal, Confirm, useToast } from '../components/ui.jsx';
 
 // FR13: contribution points, badges and rewards.
 const HISTORY_PREVIEW = 5; // latest entries shown before "Show all"
@@ -116,14 +116,12 @@ export default function RewardsPage() {
 
         <section className="card">
           <h2 style={{ marginBottom: 12 }}>Badges</h2>
-          <div className="badges">
+          <div className="badge-grid">
             {meta.badges.map((b) => (
-              <span key={b.id} className={`badge-pill ${earned.has(b.id) ? '' : 'locked'}`} title={b.description}>
-                <Icon as={BADGE_ICONS[b.id]} size={15} /> {b.label}
-              </span>
+              <BadgeMedal key={b.id} badge={b} locked={!earned.has(b.id)} />
             ))}
           </div>
-          <p className="hint" style={{ marginTop: 10 }}>Greyed-out badges are not earned yet. Hover or long-press to see how to earn them.</p>
+          <p className="hint" style={{ marginTop: 14 }}>Grey badges are not earned yet.</p>
         </section>
 
         {points.redemptions.length > 0 && (

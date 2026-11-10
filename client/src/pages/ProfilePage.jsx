@@ -4,8 +4,8 @@ import { ChevronRight, Download, LifeBuoy, LogOut, ShieldCheck, Mail, Phone, Map
 import { api, qs } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { useMeta } from '../meta.jsx';
-import { BADGE_ICONS, Icon, STROKE } from '../icons.jsx';
-import { Avatar, Empty, Loading, Sheet, useToast } from '../components/ui.jsx';
+import { Icon, STROKE } from '../icons.jsx';
+import { Avatar, BadgeMedal, Empty, Loading, Sheet, useToast } from '../components/ui.jsx';
 import { useInstall } from '../utils.js';
 import ReportCard from '../components/ReportCard.jsx';
 
@@ -61,11 +61,9 @@ export default function ProfilePage() {
             <MiniStat label="Points earned" value={profile.stats.earned} />
           </div>
           {profile.badges.length > 0 && (
-            <div className="badges" style={{ marginTop: 16 }}>
+            <div className="badge-grid" style={{ marginTop: 18 }}>
               {profile.badges.map((b) => (
-                <span key={b.id} className="badge-pill" title={b.description}>
-                  <Icon as={BADGE_ICONS[b.id]} size={15} /> {b.label}
-                </span>
+                <BadgeMedal key={b.id} badge={b} />
               ))}
             </div>
           )}

@@ -47,7 +47,8 @@ server/
   api-misc.js       meta, AI classify, notifications, profiles, points, rewards, leaderboard, stats,
                     customer support (`support_tickets`; topics from SUPPORT_TOPICS in config.js)
   ai.js             photo → category suggestion (Claude, structured JSON output)
-  seed.js           demo data; illustrations.js draws the sample report images (SVG)
+  seed.js           demo data; sample report photos come from seed-photos/ (seed-<id>-<category>.jpg),
+                    illustrations.js draws an SVG fallback if a photo is missing
   phone.js          `npm run phone`: runs the app + a cloudflared https tunnel and prints the phone link
 client/src/
   App.jsx           routes + RequireAuth (role / verified guards)

@@ -56,7 +56,7 @@ export default function Leaderboard({ title = 'Leaderboard', as: H = 'h1' }) {
                 <span className="row tiny muted" style={{ gap: 6 }}>
                   {l.reports} reports
                   {l.badges.slice(0, 3).map((b) => (
-                    <span key={b.id} title={b.label} style={{ display: 'inline-flex', color: 'var(--primary)' }}>
+                    <span key={b.id} title={b.label} className="lb-badge" style={{ '--c': b.color }}>
                       <Icon as={BADGE_ICONS[b.id]} size={13} />
                     </span>
                   ))}

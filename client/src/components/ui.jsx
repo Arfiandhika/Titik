@@ -2,7 +2,7 @@
 import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Check, ChevronDown, CircleCheck, LoaderCircle, TriangleAlert, X } from 'lucide-react';
 import { useMeta } from '../meta.jsx';
-import { CategoryIcon, Icon, StatusIcon, STROKE } from '../icons.jsx';
+import { BADGE_ICONS, CategoryIcon, Icon, StatusIcon, STROKE } from '../icons.jsx';
 import { initials } from '../utils.js';
 
 // ---- badges and states ----
@@ -24,6 +24,22 @@ export function CategoryLabel({ category, size = 15 }) {
       <CategoryIcon id={category} size={size} />
       <span className="cat-text">{c?.label || category}</span>
     </span>
+  );
+}
+
+// FR13: a badge as a round medal in its own colour with the name inside; grey until earned.
+export function BadgeMedal({ badge, locked = false }) {
+  return (
+    <div className={`badge-item ${locked ? 'locked' : ''}`} style={{ '--c': badge.color }}>
+      <div className="badge-medal">
+        <Icon as={BADGE_ICONS[badge.id]} size={30} />
+        <span className="badge-name">{badge.label}</span>
+      </div>
+      <p className="badge-desc">
+        {locked && <span className="sr-only">Not earned yet. </span>}
+        {badge.description}
+      </p>
+    </div>
   );
 }
 

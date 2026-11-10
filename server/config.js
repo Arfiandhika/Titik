@@ -83,11 +83,12 @@ export const SUPPORT_TOPICS = [
 ];
 
 export const BADGES = [
-  { id: 'first_report', label: 'First report', description: 'Posted a first report', test: (s) => s.reports >= 1 },
-  { id: 'watchful', label: 'Neighbourhood watch', description: 'Posted 10 reports', test: (s) => s.reports >= 10 },
-  { id: 'confirmer', label: 'Confirmer', description: 'Said "Me too" on 10 reports', test: (s) => s.metoos >= 10 },
-  { id: 'fixer', label: 'Got it fixed', description: '3 of your reports were resolved', test: (s) => s.resolved >= 3 },
-  { id: 'voice', label: 'Community voice', description: 'Wrote 10 comments', test: (s) => s.comments >= 10 },
+  // `color` is the badge's own theme colour (medal tint on Rewards, Profile and the leaderboard).
+  { id: 'first_report', label: 'First report', color: '#F2A65A', description: 'Posted a first report', test: (s) => s.reports >= 1 },
+  { id: 'watchful', label: 'Neighbourhood watch', color: '#6FB7E8', description: 'Posted 10 reports', test: (s) => s.reports >= 10 },
+  { id: 'confirmer', label: 'Confirmer', color: '#B9A6F0', description: 'Said "Me too" on 10 reports', test: (s) => s.metoos >= 10 },
+  { id: 'fixer', label: 'Got it fixed', color: '#F4D35E', description: '3 of your reports were resolved', test: (s) => s.resolved >= 3 },
+  { id: 'voice', label: 'Community voice', color: '#E58F8F', description: 'Wrote 10 comments', test: (s) => s.comments >= 10 },
 ];
 
 export const AI_MODEL = 'claude-opus-5-5';

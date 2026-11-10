@@ -30,7 +30,7 @@ router.get('/meta', (_req, res) => {
     statuses: STATUSES,
     authorities: AUTHORITIES.map(({ id, name, short, box }) => ({ id, name, short, box })),
     points: POINTS,
-    badges: BADGES.map(({ id, label, description }) => ({ id, label, description })),
+    badges: BADGES.map(({ id, label, description, color }) => ({ id, label, description, color })),
     aiEnabled: AI_ENABLED,
     mapCenter: MAP_CENTER,
     serviceBounds: SERVICE_BOUNDS,
@@ -122,7 +122,7 @@ export function userStats(userId) {
 }
 
 export function badgesFor(stats) {
-  return BADGES.filter((b) => b.test(stats)).map(({ id, label, description }) => ({ id, label, description }));
+  return BADGES.filter((b) => b.test(stats)).map(({ id, label, description, color }) => ({ id, label, description, color }));
 }
 
 router.get('/users/:id', optionalAuth, (req, res) => {

@@ -55,7 +55,7 @@
     linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 40px 40px,
     linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 40px 40px,
     color-mix(in srgb, var(--bg) 92%, var(--text)); }
-:root[data-theme='light'] .badge-pill, :root[data-theme='light'] .tag.accent { color: var(--text); }
+:root[data-theme='light'] .tag.accent { color: var(--text); }
 
 /* theme switch: slow cross-fade */
 ::view-transition-old(root),
@@ -447,9 +447,27 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .ledger li:last-child { border-bottom: 0; }
 .plus { color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
 .minus { color: var(--danger); font-weight: 600; font-variant-numeric: tabular-nums; }
-.badges { display: flex; flex-wrap: wrap; gap: 8px; }
-.badge-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 10px; background: var(--primary-soft); color: var(--accent); font-size: 12.5px; font-weight: 500; }
-.badge-pill.locked { background: var(--line); color: var(--muted); }
+
+/* badge medals (FR13): each badge has its own colour (--c from /api/meta); grey until earned */
+.badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 16px 8px; }
+.badge-item { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; min-width: 0; }
+.badge-medal {
+  width: 96px; height: 96px; border-radius: 50%; padding: 8px; flex: none;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+  background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--c) 32%, transparent), color-mix(in srgb, var(--c) 10%, transparent) 72%);
+  border: 2px solid color-mix(in srgb, var(--c) 75%, transparent);
+  box-shadow: inset 0 0 0 4px color-mix(in srgb, var(--c) 12%, transparent);
+  color: var(--c);
+}
+.badge-name { color: var(--text); font-size: 11px; font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; }
+.badge-desc { margin: 0; font-size: 11.5px; line-height: 1.3; color: var(--muted); max-width: 120px; }
+.badge-item.locked .badge-medal { --c: var(--muted); background: var(--line); border: 2px dashed var(--line-strong); box-shadow: none; opacity: 0.75; }
+.badge-item.locked .badge-name { color: var(--muted); }
+/* pastel colours are too light on white: darken the icon and ring in light mode */
+:root[data-theme='light'] .badge-medal { color: color-mix(in srgb, var(--c) 65%, black); border-color: color-mix(in srgb, var(--c) 80%, black); }
+:root[data-theme='light'] .badge-item.locked .badge-medal { border-color: var(--line-strong); }
+.lb-badge { display: inline-flex; color: var(--c, var(--accent)); }
+:root[data-theme='light'] .lb-badge { color: color-mix(in srgb, var(--c, var(--accent)) 65%, black); }
 .code-box { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 20px; letter-spacing: 0.08em; padding: 12px 16px; border-radius: 12px; background: var(--bg); border: 1px dashed var(--primary); text-align: center; }
 
 /* leaderboard */
@@ -710,7 +728,9 @@ button.settings-row { width: 100%; background: none; border: 0; font: inherit; c
 .composer-input {
   flex: 1; min-width: 0; resize: none; min-height: 40px; max-height: 120px; padding: 9px 14px; border-radius: 20px;
   background: var(--bg); border: 1px solid var(--line-strong); color: var(--text); font-size: 16px; line-height: 1.4;
+  scrollbar-width: none; /* no scrollbar arrows; long text still scrolls */
 }
+.composer-input::-webkit-scrollbar { display: none; }
 .composer-input:focus { outline: none; border-color: var(--accent); }
 .composer-input::placeholder { color: color-mix(in srgb, var(--muted) 70%, transparent); }
 .composer-send { flex: none; height: 40px; padding: 0 6px; background: none; border: 0; color: var(--accent); font-weight: 600; font-size: 14px; cursor: pointer; display: grid; place-items: center; }

@@ -8,6 +8,9 @@ import { db, authorityFor, authorityName, UPLOAD_DIR } from './db.js';
 import { ACCEPTED_STATUSES, CATEGORIES, HOAX_FLAG_THRESHOLD, POINTS, REWARDS, STATUSES } from './config.js';
 import { illustration } from './illustrations.js';
 
+// Real photos for the demo reports, copied into uploads on seed.
+const SEED_PHOTOS = path.join(path.dirname(fileURLToPath(import.meta.url)), 'seed-photos');
+
 const TABLES = ['support_tickets', 'account_codes', 'redemptions', 'rewards', 'points_ledger', 'notifications', 'comments', 'votes', 'status_history', 'reports', 'users'];
 
 function wipe() {
@@ -236,8 +239,16 @@ export function seed() {
         ago(r.days), ago(lastDays),
       ).lastInsertRowid;
 
-      const file = `seed-${id}-${r.cat}.svg`;
-      fs.writeFileSync(path.join(UPLOAD_DIR, file), illustration(r.cat, color[r.cat]));
+      // Sample photo from server/seed-photos (seed-<id>-<category>.jpg); fall back to a drawn picture if it's missing.
+      const photo = path.join(SEED_PHOTOS, `seed-${id}-${r.cat}.jpg`);
+      let file;
+      if (fs.existsSync(photo)) {
+        file = path.basename(photo);
+        fs.copyFileSync(photo, path.join(UPLOAD_DIR, file));
+      } else {
+        file = `seed-${id}-${r.cat}.svg`;
+        fs.writeFileSync(path.join(UPLOAD_DIR, file), illustration(r.cat, color[r.cat]));
+      }
       db.prepare('UPDATE reports SET photo = ? WHERE id = ?').run(`/uploads/${file}`, id);
 
       const startAuthority = r.initialAuthority || finalAuthority;
