@@ -1,5 +1,7 @@
 # Titik
 
+![Titik Logo](images/LogoTitik.png)
+
 Civic reporting around Malaysia (pilot). Residents report damaged public infrastructure with a photo and GPS, the report is routed to the responsible local council, and residents follow it until it is fixed. The community confirms reports ("Me too") or flags them ("Hoax"), and contributions earn points that can be redeemed for rewards. Council staff work from a dashboard scoped to their own area.
 
 ## Run it
@@ -36,21 +38,6 @@ Keep the computer running while you test. If you use a Google Maps key with webs
 
 The service worker only runs in production builds (`npm start` / `npm run phone`), not in `npm run dev`.
 
-### Demo logins
-
-The sign-in page has one-tap buttons for these.
-
-| Role | Login | Password |
-|---|---|---|
-| Resident | `demo@titik.my` | `demo123` |
-| Resident (phone) | `012-345 6789` | `demo123` |
-| DBKL staff (Kuala Lumpur) | `dbkl@titik.my` | `official123` |
-| MBPJ staff (Petaling Jaya) | `mbpj@titik.my` | `official123` |
-| MBSJ staff (Subang Jaya) | `mbsj@titik.my` | `official123` |
-| MBSA staff (Shah Alam) | `mbsa@titik.my` | `official123` |
-
-New staff accounts need the staff sign-up code (`OFFICIAL_CODE`, default `TITIK-STAFF-2026`).
-
 ### Configuration (optional)
 
 Everything works without keys. Copy the example files to turn on extras:
@@ -73,32 +60,6 @@ No email or SMS service is connected. Outside production the 6-digit verificatio
 5. **Community.** Residents say "Me too", flag a "Hoax" (at 3 hoax votes that outnumber "Me too", staff are alerted), and comment.
 6. **Points.** +10 per report, +5 per "Me too" once the council accepts the report, −10 if a report is rejected. Points buy rewards and count toward badges and the leaderboard.
 
-## Project layout
-
-```
-package.json        one install for everything (npm run setup / dev / build / start / seed)
-server/
-  index.js          Express app, static files, error handler, auto-seed on empty DB
-  config.js         categories, statuses, councils, points rules, rewards, badges
-  db.js             schema (one table per DR) and helpers
-  auth.js           auth middleware
-  api-auth.js       register, verify, login, me
-  api-reports.js    reports, votes, comments, status, forward, merge
-  api-misc.js       meta, AI, notifications, profiles, points, rewards, leaderboard, stats
-  ai.js             photo -> category suggestion (Claude)
-  seed.js           demo data; photos for the sample reports are in seed-photos/
-                    (illustrations.js draws a fallback picture if one is missing)
-client/
-  index.html, vite.config.js
-  public/           favicon, app icons, manifest.webmanifest, sw.js (installable app)
-  src/
-    main.jsx, App.jsx, styles.css
-    api.js, auth.jsx, meta.jsx, icons.jsx, utils.js   shared helpers
-    components/     ui.jsx (badges, modal, toasts), Navbar, FeedPost, GoogleMap, LocationPicker, ReportCard, ...
-    pages/          Map, Reports, New report, Report detail (with staff panel), Dashboard, Rewards, ...
-```
-
-`server/data/` (SQLite) and `server/uploads/*` are generated at runtime and are git-ignored.
 
 ## Limits of the prototype
 
