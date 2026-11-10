@@ -28,17 +28,19 @@ export function CategoryLabel({ category, size = 15 }) {
 }
 
 // A badge as a round medal in its own colour with the name inside; grey until earned.
-export function BadgeMedal({ badge, locked = false }) {
+export function BadgeMedal({ badge, locked = false, showDesc = true }) {
   return (
     <div className={`badge-item ${locked ? 'locked' : ''}`} style={{ '--c': badge.color }}>
       <div className="badge-medal">
         <Icon as={BADGE_ICONS[badge.id]} size={30} />
         <span className="badge-name">{badge.label}</span>
       </div>
-      <p className="badge-desc">
-        {locked && <span className="sr-only">Not earned yet. </span>}
-        {badge.description}
-      </p>
+      {showDesc && (
+        <p className="badge-desc">
+          {locked && <span className="sr-only">Not earned yet. </span>}
+          {badge.description}
+        </p>
+      )}
     </div>
   );
 }

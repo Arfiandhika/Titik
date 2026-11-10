@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Inbox, ShieldAlert, Clock, CalendarPlus, Search, X, CircleDot } from 'lucide-react';
+import { Inbox, ShieldAlert, Clock, CalendarPlus, Search, X, CircleDot, LayoutGrid } from 'lucide-react';
 import { api, qs } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { useMeta } from '../meta.jsx';
-import { CategoryIcon, STROKE } from '../icons.jsx';
+import { CATEGORY_ICONS, CategoryIcon, STROKE } from '../icons.jsx';
 import { timeAgo } from '../utils.js';
-import { CouncilLogo, Empty, Loading, StatusBadge, useToast } from '../components/ui.jsx';
+import { CouncilLogo, Dropdown, Empty, Loading, StatusBadge, useToast } from '../components/ui.jsx';
 
 const QUEUES = [
   { id: 'new', label: 'New', status: ['submitted'] },
@@ -134,14 +134,18 @@ export default function DashboardPage() {
                   </span>
                 )}
               </div>
-              <select className="select" style={{ width: 'auto', minHeight: 38 }} aria-label="Category" value={category} onChange={(e) => setCategory(e.target.value)}>
-                <option value="">All categories</option>
-                {meta.categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
+              <div style={{ width: 200 }}>
+                <Dropdown
+                  label="Category"
+                  align="right"
+                  value={category}
+                  onChange={setCategory}
+                  options={[
+                    { value: '', label: 'All categories', icon: LayoutGrid },
+                    ...meta.categories.map((c) => ({ value: c.id, label: c.label, icon: CATEGORY_ICONS[c.id], color: c.color })),
+                  ]}
+                />
+              </div>
             </div>
           </div>
           <div className="chips scroll" role="tablist">

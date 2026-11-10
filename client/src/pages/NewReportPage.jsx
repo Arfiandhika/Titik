@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Camera, ImagePlus, Sparkles, X, TriangleAlert, Users, Check, Info } from 'lucide-react';
+import { ArrowLeft, Bell, Camera, Check, ImagePlus, Info, Sparkles, TriangleAlert, Users, X } from 'lucide-react';
 import { api, qs } from '../api.js';
 import { useMeta } from '../meta.jsx';
 import { useAuth } from '../auth.jsx';
 import { compressImage, getPosition, formatCoords, distance } from '../utils.js';
-import { CategoryIcon, STROKE } from '../icons.jsx';
+import { CategoryIcon, STROKE, StatusIcon } from '../icons.jsx';
 import LocationPicker from '../components/LocationPicker.jsx';
-import { CategoryLabel, Spinner, StatusBadge, useToast } from '../components/ui.jsx';
+import { CategoryLabel, Confirm, Spinner, StatusBadge, useToast } from '../components/ui.jsx';
 import { authorityAt } from '../components/GoogleMap.jsx';
 
 const STEPS = ['Photo', 'Details', 'Location', 'Check and send'];
@@ -20,6 +20,7 @@ export default function NewReportPage() {
   const navigate = useNavigate();
 
   const [step, setStep] = useState(0);
+  const [dir, setDir] = useState('fwd');
   const [photo, setPhoto] = useState(null);
   const [preview, setPreview] = useState(null);
   const [ai, setAi] = useState({ state: 'idle', suggestion: null });
@@ -32,10 +33,21 @@ export default function NewReportPage() {
   const [dupesSeen, setDupesSeen] = useState(false);
   const [errors, setErrors] = useState({});
   const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(null);
+  const [discarding, setDiscarding] = useState(false);
   const titleTouched = useRef(false);
   const autoLocated = useRef(false);
 
   useEffect(() => () => preview && URL.revokeObjectURL(preview), [preview]);
+
+  // Warn before a reload or closing the tab throws away a half-finished report.
+  const dirty = Boolean(photo || title.trim() || description.trim() || location) && !sent;
+  useEffect(() => {
+    if (!dirty) return undefined;
+    const warn = (e) => e.preventDefault();
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [dirty]);
 
   // photo + AI suggestion
   async function choosePhoto(file) {
@@ -120,13 +132,20 @@ export default function NewReportPage() {
       document.getElementById('dupes')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
+    setDir('fwd');
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
     window.scrollTo(0, 0);
   }
 
+  function leave() {
+    if (window.history.length > 1) navigate(-1);
+    else navigate('/', { replace: true });
+  }
+
   function back() {
-    if (step === 0) return navigate(-1);
+    if (step === 0) return dirty ? setDiscarding(true) : leave();
     setErrors({});
+    setDir('back');
     setStep((s) => s - 1);
   }
 
@@ -161,8 +180,8 @@ export default function NewReportPage() {
       }
       const { report } = await api('/reports', { method: 'POST', form });
       refresh();
-      toast.ok(`Report sent to ${report.authorityName}. You earned ${meta.points.REPORT} points.`);
-      navigate(`/reports/${report.id}`, { replace: true });
+      setSent(report);
+      window.scrollTo(0, 0);
     } catch (err) {
       toast.error(err);
       setSending(false);
@@ -170,6 +189,8 @@ export default function NewReportPage() {
   }
 
   const council = location && authorityAt(location.lat, location.lng, meta.authorities);
+
+  if (sent) return <SentScreen report={sent} points={meta.points.REPORT} />;
 
   return (
     <div className="page narrow">
@@ -191,6 +212,7 @@ export default function NewReportPage() {
       </div>
 
       <div className="card">
+        <div key={step} className={`wizard-step ${dir}`}>
         {step === 0 && (
           <div className="stack">
             <h2>Take or choose a photo</h2>
@@ -362,6 +384,8 @@ export default function NewReportPage() {
           </div>
         )}
 
+        </div>
+
         <div className="wizard-foot">
           <button type="button" className="btn btn-ghost" onClick={back}>
             {step === 0 ? 'Cancel' : 'Back'}
@@ -375,6 +399,81 @@ export default function NewReportPage() {
               {sending && <Spinner size={16} />} Send report
             </button>
           )}
+        </div>
+      </div>
+      {discarding && (
+        <Confirm
+          title="Discard this report?"
+          message="Your photo and details will be lost."
+          confirmLabel="Discard"
+          danger
+          onConfirm={leave}
+          onClose={() => setDiscarding(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+const NEXT_STEPS = [
+  { status: 'under_review', title: 'The council checks it', hint: 'You can edit or delete it until they start.' },
+  { status: 'in_progress', title: 'Work starts', hint: 'A crew is sent to fix it.' },
+  { status: 'resolved', title: 'Fixed', hint: 'They add a photo of the fixed spot.' },
+];
+
+// Shown once the report is in: where it went, the points, and what happens next.
+function SentScreen({ report, points }) {
+  const navigate = useNavigate();
+  const routed = report.authority;
+  useEffect(() => {
+    navigator.vibrate?.(30);
+  }, []);
+  return (
+    <div className="page narrow">
+      <div className="card sent" role="status">
+        <svg className="sent-tick" viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="32" cy="32" r="32" />
+          <path d="M19 33.5l8.5 8.5L45 24.5" />
+        </svg>
+        <h1>Report sent</h1>
+        <p className="muted">
+          {routed ? (
+            <>
+              It went to <strong className="text">{report.authorityName}</strong>.
+            </>
+          ) : (
+            'Council staff will send it to the right council.'
+          )}{' '}
+          You earned <strong className="accent-text">+{points} points</strong>.
+        </p>
+
+        <div className="sent-next">
+          <h2>What happens next</h2>
+          <ol>
+            {NEXT_STEPS.map((s) => (
+              <li key={s.status} className={`st-${s.status}`}>
+                <span className="sent-dot">
+                  <StatusIcon id={s.status} size={15} />
+                </span>
+                <span>
+                  <span className="strong">{s.title}</span>
+                  <span className="tiny muted">{s.hint}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+          <p className="row small muted" style={{ gap: 8 }}>
+            <Bell size={15} strokeWidth={STROKE} aria-hidden="true" /> We notify you at each step.
+          </p>
+        </div>
+
+        <div className="stack" style={{ gap: 8, width: '100%' }}>
+          <button type="button" className="btn btn-primary btn-block" onClick={() => navigate(`/reports/${report.id}`, { replace: true })}>
+            View my report
+          </button>
+          <button type="button" className="btn btn-ghost btn-block" onClick={() => navigate('/', { replace: true })}>
+            Back to home
+          </button>
         </div>
       </div>
     </div>

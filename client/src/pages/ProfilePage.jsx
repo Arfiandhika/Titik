@@ -54,17 +54,31 @@ export default function ProfilePage() {
               </p>
             </div>
           </div>
-          <div className="grid cols-4" style={{ marginTop: 18 }}>
+          <div className={`grid ${p.role === 'official' ? 'cols-3' : 'cols-4'}`} style={{ marginTop: 18 }}>
             <MiniStat label="Reports" value={profile.stats.reports} />
             <MiniStat label="Fixed" value={profile.stats.resolved} />
             <MiniStat label='"Me too"' value={profile.stats.metoos} />
-            <MiniStat label="Points earned" value={profile.stats.earned} />
+            {p.role !== 'official' && <MiniStat label="Points earned" value={profile.stats.earned} />}
           </div>
-          {profile.badges.length > 0 && (
-            <div className="badge-grid" style={{ marginTop: 18 }}>
-              {profile.badges.map((b) => (
-                <BadgeMedal key={b.id} badge={b} />
-              ))}
+          {(profile.badges.length > 0 || (own && p.role === 'resident')) && (
+            <div className="profile-badges">
+              <div className="card-title">
+                <h2>Badges</h2>
+                {own && p.role === 'resident' && (
+                  <Link to="/rewards" className="small">
+                    See all
+                  </Link>
+                )}
+              </div>
+              {profile.badges.length > 0 ? (
+                <div className="badge-grid">
+                  {profile.badges.map((b) => (
+                    <BadgeMedal key={b.id} badge={b} showDesc={false} />
+                  ))}
+                </div>
+              ) : (
+                <p className="small muted">No badges yet.</p>
+              )}
             </div>
           )}
         </section>

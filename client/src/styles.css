@@ -464,7 +464,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 /* wizard */
 .wizard-steps { display: flex; gap: 6px; margin-bottom: 18px; }
-.wizard-steps div { flex: 1; height: 4px; border-radius: 2px; background: var(--line-strong); }
+.wizard-steps div { flex: 1; height: 4px; border-radius: 2px; background: var(--line-strong); transition: background 0.3s ease; }
 .wizard-steps div.on { background: var(--primary); }
 .wizard-foot { display: flex; gap: 10px; justify-content: space-between; margin-top: 20px; }
 
@@ -837,3 +837,47 @@ button.settings-row { width: 100%; background: none; border: 0; font: inherit; c
 }
 .install-steps { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 12px; font-size: 15px; }
 .install-steps svg { display: inline; vertical-align: -3px; }
+
+/* report sent */
+.sent { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; padding: 28px 20px; }
+.sent > * { animation: rise 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.sent > :nth-child(2) { animation-delay: 0.45s; }
+.sent > :nth-child(3) { animation-delay: 0.52s; }
+.sent > :nth-child(4) { animation-delay: 0.62s; }
+.sent > :nth-child(5) { animation-delay: 0.72s; }
+.sent-tick { width: 68px; height: 68px; overflow: visible; animation: tick-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.sent-tick circle { fill: var(--primary); }
+.sent-tick path {
+  fill: none; stroke: var(--on-primary); stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 40; animation: tick-draw 0.35s 0.3s ease-out both;
+}
+@keyframes tick-pop { from { transform: scale(0.3); opacity: 0; } }
+@keyframes tick-draw { from { stroke-dashoffset: 40; } }
+
+/* report steps slide in the direction you move */
+.wizard-step { animation: step-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.wizard-step.back { animation-name: step-back; }
+@keyframes step-in { from { opacity: 0; transform: translateX(18px); } }
+@keyframes step-back { from { opacity: 0; transform: translateX(-18px); } }
+.sent .text { color: var(--text); }
+.sent .accent-text { color: var(--accent); }
+.sent-next { width: 100%; text-align: left; border-top: 1px solid var(--line); padding-top: 16px; display: flex; flex-direction: column; gap: 12px; }
+.sent-next h2 { font-size: 16px; }
+.sent-next ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.sent-next li { display: flex; gap: 12px; align-items: flex-start; }
+.sent-next li > span:last-child { display: flex; flex-direction: column; gap: 2px; }
+.sent-dot { flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; color: var(--st); background: color-mix(in srgb, var(--st) 15%, transparent); }
+
+/* before / after on resolved reports */
+.before-after { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.before-after figure { position: relative; margin: 0; min-width: 0; }
+.before-after figcaption {
+  position: absolute; top: 10px; left: 10px; display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;
+  background: var(--card); color: var(--text); border: 1px solid var(--line);
+}
+.before-after figcaption.after svg { color: var(--st-resolved); }
+
+/* badges on the profile card */
+.profile-badges { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
+.profile-badges h2 { font-size: 16px; }

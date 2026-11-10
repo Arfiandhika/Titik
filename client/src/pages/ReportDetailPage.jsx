@@ -20,9 +20,9 @@ import {
 import { api, qs } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { useMeta } from '../meta.jsx';
-import { STROKE, StatusIcon } from '../icons.jsx';
+import { CATEGORY_ICONS, STROKE, StatusIcon } from '../icons.jsx';
 import { compressImage, dateTime, distance, inBounds, timeAgo } from '../utils.js';
-import { CategoryLabel, Empty, Loading, Spinner, StatusBadge, Modal, Confirm, useToast } from '../components/ui.jsx';
+import { CategoryLabel, Dropdown, Empty, Loading, Spinner, StatusBadge, Modal, Confirm, useToast } from '../components/ui.jsx';
 import VoteButtons from '../components/VoteButtons.jsx';
 import Comments from '../components/Comments.jsx';
 import StatusTimeline, { StatusSteps } from '../components/StatusTimeline.jsx';
@@ -67,6 +67,8 @@ export default function ReportDetailPage() {
   if (!data) return <Loading />;
 
   const r = data.report;
+  // The staff photo of the fixed spot, shown next to the original as before / after.
+  const fixedPhoto = r.status === 'resolved' ? data.history.findLast((h) => h.toStatus === 'resolved' && h.photoUrl)?.photoUrl : null;
   const setReport = (report) => setData((d) => ({ ...d, report }));
 
   async function remove() {
@@ -74,7 +76,7 @@ export default function ReportDetailPage() {
       await api(`/reports/${r.id}`, { method: 'DELETE' });
       refresh();
       toast.ok('Report deleted.');
-      navigate('/?tab=mine', { replace: true });
+      navigate('/', { replace: true });
     } catch (err) {
       toast.error(err);
       setDeleting(false);
@@ -139,7 +141,22 @@ export default function ReportDetailPage() {
             </div>
           )}
 
-          <img className="hero-photo" src={r.photoUrl} alt={`Photo of ${r.title}`} />
+          {fixedPhoto ? (
+            <div className="before-after">
+              <figure>
+                <img className="hero-photo" src={r.photoUrl} alt={`Before: ${r.title}`} />
+                <figcaption>Before</figcaption>
+              </figure>
+              <figure>
+                <img className="hero-photo" src={fixedPhoto} alt={`After: ${r.title}, fixed`} />
+                <figcaption className="after">
+                  <Check size={13} strokeWidth={STROKE} aria-hidden="true" /> After
+                </figcaption>
+              </figure>
+            </div>
+          ) : (
+            <img className="hero-photo" src={r.photoUrl} alt={`Photo of ${r.title}`} />
+          )}
 
           {!r.mergedInto && r.status !== 'rejected' && <StatusSteps status={r.status} />}
 
@@ -286,16 +303,13 @@ function EditModal({ report, categories, onClose, onSaved }) {
           <input id="e-title" className="input" value={title} maxLength={100} onChange={(e) => setTitle(e.target.value)} />
         </div>
         <div className="field">
-          <label className="label" htmlFor="e-cat">
-            Category
-          </label>
-          <select id="e-cat" className="select" value={category} onChange={(e) => setCategory(e.target.value)}>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.label}
-              </option>
-            ))}
-          </select>
+          <span className="label">Category</span>
+          <Dropdown
+            label="Category"
+            value={category}
+            onChange={setCategory}
+            options={categories.map((c) => ({ value: c.id, label: c.label, icon: CATEGORY_ICONS[c.id], color: c.color, hint: c.hint }))}
+          />
         </div>
         <div className="field">
           <label className="label" htmlFor="e-desc">

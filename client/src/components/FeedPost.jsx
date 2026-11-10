@@ -11,7 +11,7 @@ const I = (C, size = 24) => <C size={size} strokeWidth={STROKE} aria-hidden="tru
 
 // Feed-style report post. Double-tap the photo to say "Me too".
 export default function FeedPost({ report: r, onChange }) {
-  const { vote, busy, disabledReason } = useVote(r, onChange);
+  const { vote, busy, disabledReason, hoaxConfirm } = useVote(r, onChange);
   const toast = useToast();
   const [expanded, setExpanded] = useState(false);
   const [burst, setBurst] = useState(0);
@@ -155,6 +155,7 @@ export default function FeedPost({ report: r, onChange }) {
           {r.distance != null && <span>{distance(r.distance)} away</span>}
         </div>
       </div>
+      {hoaxConfirm}
       {commentsOpen && (
         <Sheet title="Comments" onClose={closeComments} className="comments-sheet">
           <Comments reportId={r.id} onCount={onCount} autoFocus inSheet />
