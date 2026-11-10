@@ -1,6 +1,6 @@
 # Titik
 
-![Titik Logo](LogoTitik.png)
+![Titik Logo](LogoTitik_Revise.png)
 
 Civic reporting around Malaysia (pilot). Residents report damaged public infrastructure with a photo and GPS, the report is routed to the responsible local council, and residents follow it until it is fixed. The community confirms reports ("Me too") or flags them ("Hoax"), and contributions earn points that can be redeemed for rewards. Council staff work from a dashboard scoped to their own area.
 
