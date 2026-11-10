@@ -19,7 +19,7 @@
         try { t = localStorage.getItem('titik-theme'); } catch (e) {}
         if (!t) t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
         document.documentElement.dataset.theme = t;
-        if (t === 'light') document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f3f7f6');
+        if (t === 'light') document.querySelector('meta[name="theme-color"]').setAttribute('content', '#fbf6f1');
       })();
     </script>
   </head>

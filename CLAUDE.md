@@ -81,19 +81,19 @@ Keep the layout flat: put new shared helpers in `utils.js` and small shared UI i
 
 ## Design rules
 
-Dark by default with a light mode, minimal, one accent. Use the CSS variables in `styles.css`; don't introduce new hex colours for UI chrome. Light-mode values live in the `:root[data-theme='light']` block; when you add a token, give it a light value there too.
+Dark by default (deep teal with a warm apricot accent) with a warm cream light mode, minimal, one accent. Use the CSS variables in `styles.css`; don't introduce new hex colours for UI chrome. Light-mode values live in the `:root[data-theme='light']` block; when you add a token, give it a light value there too.
 
 | Token | Value |
 |---|---|
-| `--primary` | `#B5F0D2` (buttons, active states, resolved status) |
+| `--primary` | `#FFC49B` apricot (buttons, active states) |
 | `--on-primary` | `#192C31` (text on primary) |
 | `--bg` | `#192C31` |
 | `--card` | `#243B40` |
-| `--text` | `#F1F5F4` |
-| `--muted` | `#9BB3B1` |
+| `--text` | `#F4F6F5` |
+| `--muted` | `#9FB5B3` |
 
-- Theme: the sun/moon button in the top bar sets `data-theme` on `<html>` via `useTheme()` in `utils.js` (follows the device until chosen, saved in localStorage; `index.html` sets it before first paint; switching cross-fades over 0.6 s via the View Transitions API, with a CSS fallback). Use `--primary` for fills (buttons, active dock item) and `--accent` for accent-coloured text, icons and borders, since mint text is unreadable on white.
-- Font: Inter (already bundled). Weights 400/500/600 only. Headings are 600 with slight negative letter-spacing.
+- Theme: the sun/moon button in the top bar sets `data-theme` on `<html>` via `useTheme()` in `utils.js` (follows the device until chosen, saved in localStorage; `index.html` sets it before first paint; switching cross-fades over 0.6 s via the View Transitions API, with a CSS fallback). Use `--primary` for fills (buttons, active dock item) and `--accent` for accent-coloured text, icons and borders, since apricot text is unreadable on white (light `--accent` is burnt orange `#B0521F`). Resolved status is its own green (`--st-resolved`), not the accent.
+- Font: Inter (already bundled). Weights 400/500/600 only; the one exception is the "titik" wordmark in the top bar (`.brand`, 700). Headings are 600 with slight negative letter-spacing.
 - Icons: Lucide only, thin strokes (1.75), single colour. **No emoji** in the UI or in notification text.
 - Status colours come from the `.st-<status>` classes (`--st` variable); category colours come from `/api/meta`.
 - Routes: `/` is the home feed (`ReportsPage`), `/map` is the map; `/reports` redirects to `/`, report details stay at `/reports/:id`.
@@ -101,7 +101,7 @@ Dark by default with a light mode, minimal, one accent. Use the CSS variables in
 - Filter and sort menus use `Dropdown` from `ui.jsx` (styled, with icons and a checkmark) rather than a native `<select>`; plain form fields can keep `<select className="select">`.
 - Map (`MapPage`, `ReportMap` in `GoogleMap.jsx`): filters are two `Dropdown`s (Show: Open / Fixed / All / Mine, and Category) plus a Near-me button; no page title. "All" excludes rejected; "Mine" (residents) uses `mine=1` and outlines pins by status. Pins cluster with `supercluster` (radius 60 px, individual pins from zoom 17); the selected report is never clustered. `/map?view=<tab>&report=<id>` opens a report (the location line on feed posts links there). The map loads up to 500 reports (server cap) for now.
 - Comments: `Comments` has an Instagram-style composer (auto-growing box + Post). On the feed it opens in a `Sheet` (bottom sheet on phones, stays above the keyboard); call `primeKeyboard()` in the tap handler so iOS opens the keyboard.
-- Installable app (PWA): `client/public/` holds `manifest.webmanifest`, `sw.js`, `favicon.svg` and the PNG icons (served at fixed URLs; Vite `publicDir`). `main.jsx` registers the service worker in production builds only. The worker caches built files and pages (network first) but never `/api` or `/uploads`. When you change caching, bump `CACHE` in `sw.js`. `useInstall()` in `utils.js` drives Profile > "Install the app". The top bar pads for the iPhone status bar with `--safe-t`.
+- Installable app (PWA): `client/public/` holds `manifest.webmanifest`, `sw.js`, `favicon.svg` and the PNG icons (apricot pin on teal; served at fixed URLs; Vite `publicDir`). `main.jsx` registers the service worker in production builds only. The worker caches built files and pages (network first) but never `/api` or `/uploads`. When you change caching, bump `CACHE` in `sw.js`. `useInstall()` in `utils.js` drives Profile > "Install the app". The top bar pads for the iPhone status bar with `--safe-t`.
 - Keep copy short and plain. Labels like "Me too", "Hoax" and "Same issue" are fixed terms from the assignment.
 
 ## Configuration

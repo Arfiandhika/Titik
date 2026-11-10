@@ -1,11 +1,11 @@
-/* Titik: dark, minimal, one accent. Use these tokens; don't add new hex colours for UI chrome. */
+/* Titik: deep teal with a warm apricot accent (dark), cream with burnt orange (light). Use these tokens; don't add new hex colours for UI chrome. */
 :root {
-  --primary: #b5f0d2;
+  --primary: #ffc49b;
   --on-primary: #192c31;
   --bg: #192c31;
   --card: #243b40;
-  --text: #f1f5f4;
-  --muted: #9bb3b1;
+  --text: #f4f6f5;
+  --muted: #9fb5b3;
 
   /* derived from the tokens above */
   --card-2: color-mix(in srgb, var(--card) 70%, var(--text) 6%);
@@ -19,8 +19,8 @@
   --st-submitted: var(--muted);
   --st-under_review: #f4d35e;
   --st-in_progress: #6fb7e8;
-  --st-resolved: var(--primary);
-  --st-rejected: #e58f8f;
+  --st-resolved: #9cd58c; /* green, so "fixed" still reads as done next to the apricot accent */
+  --st-rejected: #ef7f7f;
   --danger: var(--st-rejected);
   --warn: var(--st-under_review);
 
@@ -35,18 +35,18 @@
 
 /* Light mode: same layout, light tokens. Chosen with the sun/moon button (data-theme on <html>). */
 :root[data-theme='light'] {
-  --on-primary: #192c31;
-  --bg: #f3f7f6;
+  --on-primary: #2b1d16;
+  --bg: #fbf6f1;
   --card: #ffffff;
-  --text: #192c31;
-  --muted: #5b7370;
-  --accent: #1f7a57;
+  --text: #2b1d16;
+  --muted: #7a675b;
+  --accent: #b0521f;
   --primary-soft: color-mix(in srgb, var(--primary) 45%, transparent);
   --overlay: color-mix(in srgb, var(--text) 35%, transparent);
   --shadow: 0 10px 30px color-mix(in srgb, var(--text) 14%, transparent);
   --st-under_review: #8a6500;
   --st-in_progress: #2a73ad;
-  --st-resolved: var(--accent);
+  --st-resolved: #2f7d45;
   --st-rejected: #c04545;
   --on-danger: #ffffff;
   color-scheme: light;
@@ -130,7 +130,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
 }
-.brand { display: inline-flex; align-items: center; gap: 8px; color: var(--text); font-weight: 600; font-size: 19px; letter-spacing: -0.03em; }
+.brand { display: inline-flex; align-items: center; gap: 8px; color: var(--text); font-weight: 700; font-size: 20px; letter-spacing: -0.045em; } /* the only 700 weight: the titik wordmark */
 .brand:hover { text-decoration: none; }
 .brand-mark { width: 26px; height: 26px; border-radius: 8px; background: var(--primary); color: var(--on-primary); display: grid; place-items: center; }
 .nav-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }

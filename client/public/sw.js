@@ -2,7 +2,7 @@
 // - Pages: network first, so users always get the latest version; the last copy is used when offline.
 // - Built files (/assets/*, icons): cache first; their names change on every build.
 // - API calls and uploaded photos are never cached here, so report data is always fresh.
-const CACHE = 'titik-v1';
+const CACHE = 'titik-v3';
 const SHELL = ['/', '/manifest.webmanifest', '/favicon.svg', '/icon-192.png'];
 
 self.addEventListener('install', (event) => {

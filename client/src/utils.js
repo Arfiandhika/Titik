@@ -117,7 +117,7 @@ function savedTheme() {
 }
 export function applyTheme(theme) {
   document.documentElement.dataset.theme = theme;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'light' ? '#f3f7f6' : '#192C31');
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'light' ? '#fbf6f1' : '#192C31');
 }
 // Cross-fade the whole page when the theme changes (about 0.6 s).
 // Uses the View Transitions API where available, else CSS colour transitions.
